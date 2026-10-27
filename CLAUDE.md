@@ -15,7 +15,7 @@ Live: https://ovestridson.github.io/Nochmal/
 ## Speicher
 - **Nur lokal im Browser** – Sinn der Regel: kein Online-Speicher/Cloud-Dienst, der Geld kostet. Lokale Browser-Speicher (localStorage, IndexedDB) sind erlaubt.
 - Präfix **`nochmal`** überall (Domain wird mit GameRegal geteilt!).
-- `localStorage`: Keys `nochmal_v1` (Einträge ohne Fotos), `nochmal_user`, `nochmal_anim`, `nochmal_accent`. Lesen/Schreiben immer über `store.get/set` (try/catch).
+- `localStorage`: Keys `nochmal_v1` (Einträge ohne Fotos), `nochmal_user`, `nochmal_anim`, `nochmal_accent`, `nochmal_inbox` (`{ from, ids, at }` – „Neu von …“ nach einem Import mit fremdem Autor; weg nach „Gesehen“ oder 7 Tagen, gelöschte/fehlende IDs werden ignoriert). Lesen/Schreiben immer über `store.get/set` (try/catch).
 - `IndexedDB` „nochmal“, Store `photos`: Fotos, Schlüssel = Eintrags-id. Beim Start komplett in die Map `photos` geladen (`loadPhotos`), Zugriff über `photoOf(e)`, Schreiben über `setPhoto/setPhotos`.
 
 ## Datenmodell
@@ -55,6 +55,19 @@ Ein Eintrag = eine Bewertung:
 - Abschnitte im Script sind mit `/* ===== Name ===== */` markiert. Erst den passenden Abschnitt lesen, nicht die ganze Datei.
 - Klicks laufen über Event-Delegation mit `data-act="…"` (ein `switch`). Neue Aktionen dort ergänzen.
 - Ansichten: `renderHome` / `renderList` / `renderDetail`; Sheets: `openSheet` / `closeSheet`.
+
+## Startseite
+Von oben nach unten:
+1. **Dashboard** `#dash` (`dashHTML()`, Abschnitt „Dashboard“), Sektionen gestaffelt über `.stagger`:
+   - Begrüßung nach Tageszeit (`greeting()`) + geparkter Roller mit Dampf (`parked()` = `SCOOTER` + Ständer/Dampf)
+   - Mini-Statistik: Restaurants · Gerichte · ✕ Nie wieder, zählt per `countUp()` hoch (nur beim Öffnen mit Stagger)
+   - „Was gibt’s heute?“ (`roll()`): zufälliges ✓-Gericht, Slot-Machine mit 3 Walzen (~1,2 s), Ergebnis in `ui.pick`; ohne Animation sofort; ohne ✓-Gerichte ein Hinweis
+   - „Neu von {from}“ aus `nochmal_inbox` (`inbox()`, `noteInbox()` im Import)
+   - „Eure/Deine Lieblinge“: ✓-Gerichte, bei mehreren Autoren nur die, die alle mit ✓ bewertet haben; max. 10
+   - Demo-Daten zählen mit.
+2. Suche, Küchen-Kacheln, Demo-Hinweis, Restaurantliste.
+- Dashboard nur ohne Suchtext und ohne Küchen-Filter (`dashOn()`). `renderList` schaltet nur `#dash.hidden` um – beim Tippen wird das Dashboard nie neu gerendert.
+- Leerer Zustand (`emptyHTML()`): Roller + Tüte, „So geht’s“ in 3 Schritten, dann Erster Eintrag / Demo / Import.
 
 ## Arbeitsweise
 - Kleine, gezielte Änderungen statt Datei neu schreiben.
