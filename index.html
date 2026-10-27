@@ -117,6 +117,23 @@ svg{display:block;max-width:100%}
 .shelf-row .shelf::before{content:"";display:inline-block;width:8px;height:8px;margin-right:8px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor;vertical-align:1px}
 .shelf-row .mini-btn{height:44px}
 
+/* ---------- Personen ---------- */
+.whos{display:flex;flex-wrap:wrap;gap:8px}
+.people{display:flex;align-items:center;gap:8px;overflow-x:auto;padding:0 16px 14px;margin:-4px -16px 0;scrollbar-width:none}
+.people::-webkit-scrollbar{display:none}
+.people>span{flex:none;margin:0 2px 0 4px;font-size:12.5px;font-weight:750;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.who,.pchip{flex:none;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:999px;background:var(--surface);border:2px solid transparent;color:var(--muted);font-size:14px;font-weight:750;transition:border-color .2s,color .2s,background .2s}
+.who[aria-pressed="true"],.pchip[aria-pressed="true"]{border-color:var(--accent);color:var(--text);background:var(--surface2)}
+.pchip{padding:0 12px 0 5px}
+.pchip .av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:rgba(var(--accent-rgb),.2);color:var(--accent);font-size:14px;font-weight:900}
+.pchip .n{color:var(--good);font-size:13px;font-weight:800}
+#f-a{margin-top:10px}
+.plist{display:grid;gap:8px}
+@media (min-width:620px){.plist{grid-template-columns:1fr 1fr}}
+.prow{display:flex;align-items:center;gap:12px;width:100%;min-width:0;padding:12px;border-radius:16px;background:var(--surface);border:1px solid rgba(74,222,128,.22);text-align:left;transition:transform .15s}
+.prow:active{transform:scale(.98)}
+.prow .pimg{flex:none;width:54px;height:54px;border-radius:17px;object-fit:cover}
+
 /* ---------- Leerer Zustand ---------- */
 .empty .art{width:min(100%,300px);margin-bottom:-4px}
 .empty .art svg{width:100%;height:auto;overflow:visible}
@@ -430,7 +447,7 @@ html.theming *{transition:background-color .35s,border-color .35s,color .35s,box
 
 /* ===================== Grundlagen ===================== */
 const $ = (s, r = document) => r.querySelector(s);
-const LS = { data: 'nochmal_v1', user: 'nochmal_user', anim: 'nochmal_anim', accent: 'nochmal_accent', inbox: 'nochmal_inbox' };
+const LS = { data: 'nochmal_v1', user: 'nochmal_user', anim: 'nochmal_anim', accent: 'nochmal_accent', inbox: 'nochmal_inbox', alias: 'nochmal_alias' };
 const store = {
   get(k, f) { try { const v = localStorage.getItem(k); return v == null ? f : JSON.parse(v); } catch (e) { return f; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } },
@@ -471,7 +488,7 @@ const PRESETS = [
   { name: 'Türkis', hex: '#4fd1c5' }, { name: 'Rosé', hex: '#f49ac1' }
 ];
 let accent = store.get(LS.accent, PRESETS[0].hex);
-const ui = { view: 'home', rKey: null, q: '', cuisine: 'all', fresh: new Set(), homeScroll: 0, edit: null, dishCtx: null, sheetLocked: false, pick: null, rollT: 0 };
+const ui = { view: 'home', rKey: null, q: '', cuisine: 'all', fresh: new Set(), homeScroll: 0, edit: null, dishCtx: null, sheetLocked: false, pick: null, rollT: 0, person: null, importData: null };
 
 const persist = () => { if (!store.set(LS.data, { v: 1, entries })) toast('Speichern fehlgeschlagen – Speicher voll oder gesperrt?'); };
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -771,6 +788,11 @@ function groupRestaurants() {
     return r;
   }).sort((a, b) => b.last - a.last);
 }
+// Bearbeiten darf, wer den Eintrag geschrieben hat – auch wenn er im Namen einer anderen Person angelegt wurde (by)
+const canEdit = e => e.author === user || e.by === user;
+// Alle Personen: ich zuerst, dann der Rest alphabetisch
+const people = () => [user, ...[...new Set(live().map(e => e.author))].filter(a => a !== user).sort((a, b) => a.localeCompare(b, 'de'))].filter(Boolean);
+const lovedBy = (d, p) => d.byAuthor.some(e => e.author === p && e.verdict === 'good');
 const currentRestaurant = () => groupRestaurants().find(r => r.key === ui.rKey);
 const pillsHTML = t => ['good', 'mixed', 'ok', 'bad'].filter(k => t[k]).map(k => `<span class="pill ${k}">${SYM[k]} ${t[k]}</span>`).join('');
 
@@ -803,7 +825,7 @@ const headerHTML = () => `<header class="top"><div class="brand">${ico('other', 
 function renderHome(opts = {}) {
   const view = $('#view');
   if (!live().length) { view.innerHTML = headerHTML() + emptyHTML(); return; }
-  view.innerHTML = headerHTML() + `<div id="dash" class="dash${opts.stagger ? ' stagger' : ''}">${dashHTML()}</div><div class="searchwrap"><label class="search">${SVG.search}<input id="q" type="search" placeholder="Restaurant oder Gericht suchen" value="${esc(ui.q)}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Suchen"></label></div><div class="cats" id="cats"></div>${hasDemo() ? `<div class="demo-banner"><span><b>Demo-Daten aktiv</b> – werden nie geteilt oder exportiert</span><button data-act="remove-demo">Entfernen</button></div>` : ''}<h4 class="shelf" id="lhead"></h4><div id="list"></div>`;
+  view.innerHTML = headerHTML() + `<div id="dash" class="dash${opts.stagger ? ' stagger' : ''}">${dashHTML()}</div><div class="searchwrap"><label class="search">${SVG.search}<input id="q" type="search" placeholder="Restaurant oder Gericht suchen" value="${esc(ui.q)}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Suchen"></label></div><div class="cats" id="cats"></div><div class="people" id="people" hidden></div>${hasDemo() ? `<div class="demo-banner"><span><b>Demo-Daten aktiv</b> – werden nie geteilt oder exportiert</span><button data-act="remove-demo">Entfernen</button></div>` : ''}<h4 class="shelf" id="lhead"></h4><div id="list"></div>`;
   renderList(opts.stagger);
   if (opts.stagger && !$('#dash').hidden) countUp($('#dash'));
 }
@@ -819,7 +841,7 @@ function emptyHTML() {
 
 /* ===================== Dashboard ===================== */
 // Liegt über Suche/Küchen/Liste. Nur sichtbar ohne Suchtext und ohne Küchen-Filter; Demo-Daten zählen mit.
-const dashOn = () => !norm(ui.q) && ui.cuisine === 'all';
+const dashOn = () => !norm(ui.q) && ui.cuisine === 'all' && !ui.person;
 function greeting() {
   const h = new Date().getHours(), n = user ? `, ${user}` : '';
   if (h >= 5 && h < 11) return [`Guten Morgen${n}!`, 'Schon gefrühstückt?'];
@@ -912,8 +934,17 @@ function renderList(stagger) {
   $('#cats').innerHTML = catHTML('all', 'Alle', all.length, 'var(--accent)') +
     CUISINES.filter(c => count[c.id]).map(c => catHTML(c.id, c.label, count[c.id], c.c)).join('');
 
+  const ps = people(), pe = $('#people');
+  if (ui.person && !ps.includes(ui.person)) ui.person = null;
+  pe.hidden = ps.length < 2;
+  pe.innerHTML = ps.length < 2 ? '' : '<span>Lieblinge von</span>' + ps.map(p => {
+    const n = all.reduce((s, r) => s + r.dishes.filter(d => lovedBy(d, p)).length, 0);
+    return `<button class="pchip" data-act="person" data-p="${esc(p)}" aria-pressed="${ui.person === p}"><span class="av">${esc(p.slice(0, 1).toUpperCase())}</span>${esc(p)}<span class="n">✓ ${n}</span></button>`;
+  }).join('');
+
   const q = norm(ui.q); const hits = new Map();
   let list = all.filter(r => ui.cuisine === 'all' || r.cuisine === ui.cuisine);
+  if (ui.person) return renderPersonList(list, q, stagger);
   if (q) list = list.filter(r => {
     const dh = r.dishes.filter(d => norm(d.name).includes(q));
     if (dh.length) hits.set(r.key, dh);
@@ -931,6 +962,24 @@ function renderList(stagger) {
   }
   el.className = 'list' + (stagger ? ' stagger' : '');
   el.innerHTML = list.map((r, i) => cardHTML(r, i, hits.get(r.key))).join('');
+}
+// Personen-Filter: alle Gerichte, die diese Person zuletzt mit ✓ bewertet hat – Suche filtert darin
+function renderPersonList(rs, q, stagger) {
+  const p = ui.person, el = $('#list');
+  const rows = rs.flatMap(r => r.dishes.filter(d => lovedBy(d, p)).map(d => ({ r, d, e: d.byAuthor.find(x => x.author === p) })))
+    .filter(x => !q || norm(x.d.name).includes(q) || norm(x.r.name).includes(q))
+    .sort((a, b) => b.e.createdAt - a.e.createdAt);
+  $('#dash').hidden = true;
+  $('#lhead').innerHTML = `<span class="v-good">✓</span> Lieblinge von ${esc(p)} <small>${rows.length}</small>`;
+  if (!rows.length) {
+    el.className = '';
+    el.innerHTML = `<div class="noresult"><p>${q ? `Keine ✓-Gerichte von ${esc(p)} für „${esc(ui.q)}“.` : `${esc(p)} hat${ui.cuisine !== 'all' ? ' in dieser Küche' : ''} noch nichts mit ✓ bewertet.`}</p></div>`;
+    return;
+  }
+  el.className = 'plist' + (stagger ? ' stagger' : '');
+  el.innerHTML = rows.map(({ r, d, e }, i) => { const ph = photoOf(e) || d.photo;
+    return `<button class="prow" data-act="open-dish" data-key="${esc(r.key)}" data-dish="${esc(d.key)}" style="--i:${Math.min(i, 12)}">
+      ${ph ? `<img class="pimg" src="${esc(ph)}" alt="" loading="lazy">` : ico(r.cuisine)}<span class="pbody"><b>${esc(d.name)}</b><small>${esc(r.name)}${d.price != null ? ' · ' + fmtPrice(d.price) : ''} · ${relDate(e.createdAt)}</small>${e.note ? `<i>„${esc(e.note)}“</i>` : ''}</span></button>`; }).join('');
 }
 const catHTML = (id, label, n, color) => `<button class="cbtn" data-act="cuisine" data-c="${id}" style="--c:${color}" aria-pressed="${ui.cuisine === id}">${ico(id, 'mid', color)}${esc(label)}<span class="cnt">${n}</span></button>`;
 function cardHTML(r, i, hit) {
@@ -1021,7 +1070,7 @@ function openDish(dKey) {
     ${d.photos.length ? `<div class="photos${d.photos.length > 1 ? ' multi' : ''}">${d.photos.map(p => `<img src="${esc(p)}" alt="Foto: ${esc(d.name)}">`).join('')}</div>` : ''}
     <div class="hist">${d.entries.map(e => `<div class="hitem"><span class="vote ${e.verdict}"><span class="sym">${VERDICT[e.verdict].sym}</span>${VERDICT[e.verdict].short}</span>
       <div class="hmeta"><b>${esc(e.author)}</b> · ${relDate(e.createdAt)}${e.price != null ? ' · ' + fmtPrice(e.price) : ''}${e.note ? `<div class="note">„${esc(e.note)}“</div>` : ''}</div>
-      ${e.author === user ? `<button class="mini-btn" data-act="edit" data-id="${esc(e.id)}">Ändern</button>` : '<span></span>'}</div>`).join('')}</div>
+      ${canEdit(e) ? `<button class="mini-btn" data-act="edit" data-id="${esc(e.id)}">Ändern</button>` : '<span></span>'}</div>`).join('')}</div>
     <div class="btns"><button class="btn primary" data-act="rate-again">Neu bewerten</button><button class="btn ghost" data-act="share-dish">${SVG.share} Teilen</button></div>`);
 }
 function openEditor({ id = null, restaurant = '', cuisine = null, dish = '' } = {}) {
@@ -1029,7 +1078,7 @@ function openEditor({ id = null, restaurant = '', cuisine = null, dish = '' } = 
   const rs = groupRestaurants();
   const rName = e ? e.restaurant : restaurant;
   const match = rs.find(r => r.key === norm(rName));
-  ui.edit = { id, st: { verdict: e ? e.verdict : null, cuisine: e ? e.cuisine : (cuisine || match?.cuisine || 'other'), photo: e ? photoOf(e) : null } };
+  ui.edit = { id, st: { verdict: e ? e.verdict : null, cuisine: e ? e.cuisine : (cuisine || match?.cuisine || 'other'), photo: e ? photoOf(e) : null, author: e ? e.author : user } };
   const st = ui.edit.st;
   openSheet(`<button class="grab" data-act="close" aria-label="Schließen"></button><h2>${e ? 'Eintrag ändern' : 'Wie war’s?'}</h2>
     <div class="field"><label for="f-r">Restaurant</label><input class="inp" id="f-r" list="dl-r" value="${esc(rName)}" placeholder="z. B. Sultan Kebab" autocomplete="off" autocapitalize="words" enterkeyhint="next"><datalist id="dl-r">${rs.map(r => `<option value="${esc(r.name)}">`).join('')}</datalist></div>
@@ -1037,10 +1086,23 @@ function openEditor({ id = null, restaurant = '', cuisine = null, dish = '' } = 
     <div class="field row2"><div><label for="f-d">Gericht</label><input class="inp" id="f-d" list="dl-d" value="${esc(e ? e.dish : dish)}" placeholder="z. B. Lamm-Dürüm" autocomplete="off" enterkeyhint="next"><datalist id="dl-d"></datalist></div>
       <div><label for="f-p">Preis</label><input class="inp" id="f-p" inputmode="decimal" placeholder="9,50" value="${e && e.price != null ? String(e.price).replace('.', ',') : ''}" enterkeyhint="next"></div></div>
     <div class="field"><span class="lbl">Urteil</span><div class="verdicts" id="verdicts">${['good', 'ok', 'bad'].map(v => `<button type="button" class="vbtn ${v}" data-act="verdict" data-v="${v}" aria-pressed="${st.verdict === v}"><span class="sym">${VERDICT[v].sym}</span>${VERDICT[v].short}</button>`).join('')}</div></div>
+    <div class="field"><span class="lbl">Bewertet von</span><div class="whos" id="whos">${whoHTML()}</div><input class="inp" id="f-a" placeholder="Name der Person" maxlength="24" autocomplete="off" autocapitalize="words" enterkeyhint="next" hidden></div>
     <div class="field"><span class="lbl">Foto <span style="font-weight:500">(optional)</span></span><div id="photo-slot">${photoSlotHTML(st.photo)}</div></div>
     <div class="field"><label for="f-n">Notiz <span style="font-weight:500">(optional)</span></label><textarea class="inp" id="f-n" rows="3" placeholder="Was war gut, was nicht? Kam es warm an?">${esc(e ? e.note : '')}</textarea></div>
     <div class="btns"><button class="btn primary" data-act="save">Speichern</button>${e ? '<button class="btn danger" data-act="delete">Löschen</button>' : ''}</div>`,
     () => fillDishList(match));
+}
+function whoHTML() {
+  const a = ui.edit.st.author, ps = people();
+  if (a && !ps.includes(a)) ps.push(a);
+  return ps.map(p => `<button type="button" class="who" data-act="pick-who" data-name="${esc(p)}" aria-pressed="${a === p}">${esc(p)}${p === user ? ' (ich)' : ''}</button>`).join('')
+    + `<button type="button" class="who" data-act="pick-who" data-name="" aria-pressed="${a === null}">+ Andere Person</button>`;
+}
+function pickWho(name) {
+  ui.edit.st.author = name || null;
+  $('#whos').innerHTML = whoHTML();
+  const inp = $('#f-a'); inp.hidden = !!name;
+  if (!name) inp.focus();
 }
 const photoSlotHTML = p => p
   ? `<div class="pslot has"><img src="${esc(p)}" alt="Foto vom Gericht"><div class="pacts"><button type="button" class="mini-btn" data-act="pick-photo">Ändern</button><button type="button" class="mini-btn" data-act="drop-photo">Entfernen</button></div></div>`
@@ -1097,15 +1159,20 @@ function saveEntry() {
   if (!dish) return fieldErr('#f-d', 'Welches Gericht?');
   if (Number.isNaN(price)) return fieldErr('#f-p', 'Preis bitte als Zahl, z. B. 9,50');
   if (!st.verdict) { restart($('#verdicts'), 'thud'); return toast('Wie war’s? Tipp auf die Ampel.'); }
+  let author = st.author ?? $('#f-a').value.trim().replace(/\s+/g, ' ');
+  if (!author) return fieldErr('#f-a', 'Für wen ist die Bewertung?');
+  author = people().find(p => norm(p) === norm(author)) || author; // gleiche Schreibweise wie vorhandene Person
+  const by = author !== user ? user : null; // im Namen einer anderen Person angelegt → ich darf weiter ändern
   const existing = groupRestaurants().find(r => r.key === norm(restaurant));
   const rName = existing ? existing.name : restaurant; // gleiche Schreibweise beibehalten
   const now = Date.now(), photo = st.photo || null; let id;
   if (isEdit) {
     const e = entries.find(x => x.id === ui.edit.id);
-    Object.assign(e, { restaurant: rName, cuisine: st.cuisine, dish, price, verdict: st.verdict, note, updatedAt: now }); id = e.id;
+    Object.assign(e, { restaurant: rName, cuisine: st.cuisine, dish, price, verdict: st.verdict, note, author, updatedAt: now }); id = e.id;
+    if (by) e.by = by; else delete e.by;
   } else {
     id = uuid();
-    entries.push({ id, restaurant: rName, cuisine: st.cuisine, dish, price, verdict: st.verdict, note, author: user, createdAt: now, updatedAt: now, deleted: false });
+    entries.push({ id, restaurant: rName, cuisine: st.cuisine, dish, price, verdict: st.verdict, note, author, ...(by ? { by } : {}), createdAt: now, updatedAt: now, deleted: false });
   }
   if (photo !== (photos.get(id) || null)) {
     setPhoto(id, photo).then(ok => { if (!ok) toast('Foto konnte nicht gespeichert werden'); });
@@ -1121,7 +1188,7 @@ function saveEntry() {
       if (verdict === 'bad' && animOn()) { const s = row.querySelector('.stamp'); if (s) restart(s, 'slam'); restart(row, 'thud'); }
     }
     if (!isEdit) scooter('ltr', 'Geliefert!');
-    toast(isEdit ? 'Änderung gespeichert' : 'Gespeichert');
+    toast((isEdit ? 'Änderung gespeichert' : 'Gespeichert') + (by ? ` – für ${author}` : ''));
   };
   if (ui.view === 'detail' && ui.rKey === rKey) { renderDetail(); setTimeout(after, 60); }
   else openRestaurant(rKey, null, { noStagger: true }).then(after);
@@ -1137,7 +1204,9 @@ function deleteEntry() {
 /* ===================== Teilen / Import ===================== */
 function payload(list, header) {
   // v2: Einträge können ein Foto (photo) haben – alte v1-Dateien bleiben lesbar
-  const withPhotos = list.map(e => photos.has(e.id) ? { ...e, photo: photos.get(e.id) } : e);
+  // Umbenennungen aus dem Import zurückübersetzen, damit die andere Person ihre Einträge unter ihrem eigenen Namen bekommt
+  const back = new Map(Object.entries(store.get(LS.alias, {})).map(([o, n]) => [n, o])), orig = a => back.get(a) ?? a;
+  const withPhotos = list.map(e => ({ ...e, author: orig(e.author), ...(e.by ? { by: orig(e.by) } : {}), ...(photos.has(e.id) ? { photo: photos.get(e.id) } : {}) }));
   const json = JSON.stringify({ app: 'nochmal', v: 2, from: user, exportedAt: Date.now(), entries: withPhotos });
   return `${header}\n\nIn „Nochmal?“ öffnen: Einstellungen → Datei importieren.\n---\n${json}`;
 }
@@ -1183,7 +1252,7 @@ function clean(x) {
     price: typeof x.price === 'number' && isFinite(x.price) ? Math.round(x.price * 100) / 100 : null,
     verdict: x.verdict, note: s(x.note, 500),
     photo: typeof x.photo === 'string' && x.photo.length < 1500000 && /^data:image\/(jpeg|png|webp);base64,[a-z0-9+/]+=*$/i.test(x.photo) ? x.photo : null,
-    author: s(x.author, 24) || 'Unbekannt',
+    author: s(x.author, 24) || 'Unbekannt', ...(s(x.by, 24) ? { by: s(x.by, 24) } : {}),
     createdAt: num(x.createdAt), updatedAt: num(x.updatedAt), deleted: !!x.deleted };
 }
 function merge(list) {
@@ -1193,7 +1262,7 @@ function merge(list) {
     const { photo, ...x } = c; // Foto gehört in die IndexedDB, nicht in den Eintrag
     const ex = byId.get(x.id);
     if (!ex) { entries.push(x); byId.set(x.id, x); if (!x.deleted) { added++; fresh.add(x.id); } }
-    else if (x.updatedAt > ex.updatedAt) { Object.assign(ex, x); updated++; if (!x.deleted) fresh.add(x.id); }
+    else if (x.updatedAt > ex.updatedAt) { Object.assign(ex, x); if (!x.by) delete ex.by; updated++; if (!x.deleted) fresh.add(x.id); }
     else continue;
     if (photo || photos.has(x.id)) pics.set(x.id, x.deleted ? null : photo);
   }
@@ -1205,18 +1274,61 @@ $('#fileIn').addEventListener('change', async ev => {
   const f = ev.target.files[0]; ev.target.value = ''; if (!f) return;
   let data;
   try { data = parsePayload(await f.text()); } catch (e) { toast('Das ist keine gültige Nochmal?-Datei'); return; }
-  const res = merge(data.entries);
-  noteInbox(res.fresh, data.from);
+  // Fremde Namen in der Datei? Erst fragen, wie sie bei mir heißen sollen
+  const others = [...fileAuthors(data)].filter(([a]) => a !== user);
+  if (others.length) openImportSheet(data, others); else applyImport(data, new Map());
+});
+// Wer steht wie oft in der Datei (nur gültige, nicht gelöschte Einträge)
+function fileAuthors(data) {
+  const m = new Map();
+  for (const raw of data.entries) { const c = clean(raw); if (c && !c.deleted) m.set(c.author, (m.get(c.author) || 0) + 1); }
+  return m;
+}
+function openImportSheet(data, others) {
+  const alias = store.get(LS.alias, {}), n = others.reduce((s, [, c]) => s + c, 0);
+  ui.importData = data; ui.sheetLocked = false;
+  openSheet(`<button class="grab" data-act="close" aria-label="Schließen"></button><h2>Import${data.from ? ` von ${esc(data.from)}` : ''}</h2>
+    <p class="hint" style="margin:-8px 2px 16px">${n} Bewertung${n === 1 ? '' : 'en'} von anderen. Wie sollen die Namen bei dir heißen?</p>
+    ${others.map(([a, c], i) => `<div class="field"><label for="f-al${i}">${esc(a)} · ${c} Bewertung${c === 1 ? '' : 'en'}</label><input class="inp" id="f-al${i}" data-old="${esc(a)}" value="${esc(alias[a] || a)}" maxlength="24" autocomplete="off" autocapitalize="words" enterkeyhint="done"></div>`).join('')}
+    <p class="hint">Gilt auch für vorhandene Einträge mit diesem Namen und für künftige Importe.</p>
+    <div class="btns" style="margin-top:16px"><button class="btn primary" data-act="import-go">Importieren</button><button class="btn ghost" data-act="close">Abbrechen</button></div>`);
+}
+function confirmImport() {
+  const data = ui.importData; if (!data) return;
+  const alias = store.get(LS.alias, {}), map = new Map();
+  for (const inp of document.querySelectorAll('#sheet [data-old]')) {
+    const old = inp.dataset.old; let v = inp.value.trim().replace(/\s+/g, ' ');
+    if (!v) return fieldErr('#' + inp.id, 'Name darf nicht leer sein');
+    if (norm(v) === norm(user)) return fieldErr('#' + inp.id, 'Das ist dein eigener Name');
+    v = people().find(p => norm(p) === norm(v)) || v;
+    if (v === old) delete alias[old]; else { alias[old] = v; map.set(old, v); }
+  }
+  store.set(LS.alias, alias);
+  ui.importData = null;
+  applyImport(data, map);
+}
+function applyImport(data, map) {
+  const ren = a => map.get(a) ?? a, cut = a => String(a ?? '').trim().slice(0, 24);
+  // Umbenennen gilt auch für vorhandene Einträge – updatedAt bleibt, sonst wäre es beim nächsten Abgleich ein „neuerer“ Stand
+  let renamed = 0;
+  if (map.size) for (const e of entries) {
+    if (map.has(e.author)) { e.author = ren(e.author); renamed++; }
+    if (e.by && map.has(e.by)) e.by = ren(e.by);
+  }
+  if (renamed) persist();
+  const list = map.size ? data.entries.map(x => x && typeof x === 'object' ? { ...x, author: ren(cut(x.author)), ...(x.by ? { by: ren(cut(x.by)) } : {}) } : x) : data.entries;
+  const res = merge(list);
+  noteInbox(res.fresh, data.from && ren(data.from));
   ui.sheetLocked = false; closeSheet();
-  if (!res.added && !res.updated) { toast('Alles schon bekannt – nichts Neues dabei'); return; }
+  if (!res.added && !res.updated) { if (renamed) rerender(); toast(renamed ? 'Nichts Neues – Namen angepasst' : 'Alles schon bekannt – nichts Neues dabei'); return; }
   ui.fresh = res.fresh; setTimeout(() => ui.fresh.clear(), 4000);
-  ui.q = ''; ui.cuisine = 'all';
+  ui.q = ''; ui.cuisine = 'all'; ui.person = null;
   if (ui.view === 'detail') history.back(); // zurück zur Übersicht
   ui.view = 'home'; renderHome({ stagger: true }); window.scrollTo(0, 0);
-  const from = data.from && data.from !== user ? data.from : null;
+  const from = data.from && ren(data.from) !== user ? ren(data.from) : null;
   scooter('rtl', from ? `Post von ${from}!` : 'Backup da!');
   toast([res.added && `${res.added} neu`, res.updated && `${res.updated} aktualisiert`].filter(Boolean).join(' · '));
-});
+}
 
 $('#photoIn').addEventListener('change', async ev => {
   const f = ev.target.files[0]; ev.target.value = ''; if (!f || !ui.edit) return;
@@ -1303,6 +1415,10 @@ document.addEventListener('click', ev => {
       ui.cuisine = el.dataset.c === ui.cuisine ? 'all' : el.dataset.c;
       renderList(true); poke($(`#cats .cbtn[data-c="${ui.cuisine}"] .ico`)); break;
     case 'roll': roll(); break;
+    case 'person': ui.person = el.dataset.p === ui.person ? null : el.dataset.p; renderList(true); break;
+    case 'open-dish': { const dk = el.dataset.dish; openRestaurant(el.dataset.key, null).then(() => openDish(dk)); break; }
+    case 'pick-who': pickWho(el.dataset.name); break;
+    case 'import-go': confirmImport(); break;
     case 'inbox-seen': store.del(LS.inbox); el.closest('section')?.remove(); break;
     case 'pick-photo': $('#photoIn').click(); break;
     case 'drop-photo': ui.edit.st.photo = null; syncPhoto(); break;

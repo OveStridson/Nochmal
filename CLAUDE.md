@@ -15,12 +15,13 @@ Live: https://ovestridson.github.io/Nochmal/
 ## Speicher
 - **Nur lokal im Browser** – Sinn der Regel: kein Online-Speicher/Cloud-Dienst, der Geld kostet. Lokale Browser-Speicher (localStorage, IndexedDB) sind erlaubt.
 - Präfix **`nochmal`** überall (Domain wird mit GameRegal geteilt!).
-- `localStorage`: Keys `nochmal_v1` (Einträge ohne Fotos), `nochmal_user`, `nochmal_anim`, `nochmal_accent`, `nochmal_inbox` (`{ from, ids, at }` – „Neu von …“ nach einem Import mit fremdem Autor; weg nach „Gesehen“ oder 7 Tagen, gelöschte/fehlende IDs werden ignoriert). Lesen/Schreiben immer über `store.get/set` (try/catch).
+- `localStorage`: Keys `nochmal_v1` (Einträge ohne Fotos), `nochmal_user`, `nochmal_anim`, `nochmal_accent`, `nochmal_inbox` (`{ from, ids, at }` – „Neu von …“ nach einem Import mit fremdem Autor; weg nach „Gesehen“ oder 7 Tagen, gelöschte/fehlende IDs werden ignoriert), `nochmal_alias` (`{ alterName: neuerName }` – Umbenennungen aus dem Import). Lesen/Schreiben immer über `store.get/set` (try/catch).
 - `IndexedDB` „nochmal“, Store `photos`: Fotos, Schlüssel = Eintrags-id. Beim Start komplett in die Map `photos` geladen (`loadPhotos`), Zugriff über `photoOf(e)`, Schreiben über `setPhoto/setPhotos`.
 
 ## Datenmodell
 Ein Eintrag = eine Bewertung:
-`{ id, restaurant, cuisine, dish, price|null, verdict:'good'|'ok'|'bad', note, author, createdAt, updatedAt, deleted, demo? }`
+`{ id, restaurant, cuisine, dish, price|null, verdict:'good'|'ok'|'bad', note, author, by?, createdAt, updatedAt, deleted, demo? }`
+- `author` = wessen Urteil es ist. `by` = wer den Eintrag angelegt hat, nur gesetzt, wenn das jemand anderes war („im Namen von“, Editor-Feld „Bewertet von“).
 - `photo` steht **nur in Exportdateien** (JPEG-Data-URL). Auf dem Gerät liegt es in der IndexedDB (siehe Speicher). `shrinkPhoto()` rechnet auf max. 1200 px / ca. 250 KB herunter. Beim Löschen eines Eintrags wird sein Foto entfernt.
 - Küchen (`CUISINES`): Pizza, Pasta, Burger, Döner, Schnitzel & Deutsch, Griechisch, Orientalisch, Hähnchen, Asiatisch, Sushi, Indisch, Mexikanisch, Bowl & Salat, Frühstück, Süßes, Sonstiges – jede mit eigenem SVG-Icon + Poke-Animation. Nur Essen, kein Non-Food.
 - `id` über `uuid()` (hat Fallback, weil `crypto.randomUUID` über http fehlt).
@@ -28,13 +29,14 @@ Ein Eintrag = eine Bewertung:
 - **Nie hart löschen**, sondern `deleted:true` (Lösch-Markierung, sonst holt der Import den Eintrag zurück). Ausnahme: Demo-Daten.
 - Restaurants und Gerichte werden abgeleitet, nicht gespeichert: gruppiert über `norm()` (klein, ohne Akzente, ß→ss).
 - Gericht-Status: letzte Bewertung je Autor; sind die Urteile uneins → `mixed` („Geschmackssache“).
-- Bearbeiten/Löschen nur für eigene Einträge (`author === user`).
+- Bearbeiten/Löschen nur für eigene Einträge: `canEdit(e)` = `author === user || by === user`.
 - `demo:true`: wird nie exportiert, geteilt oder importiert; „Demo-Daten entfernen“ löscht nur diese.
 
 ## Teilen & Import
 - Format (`.txt`): lesbare Kopfzeilen, dann `\n---\n`, dann JSON `{ app:'nochmal', v:2, from, exportedAt, entries }` (v2: Fotos werden mitgeschickt).
 - Senden über `navigator.share({files})`, sonst Download. Gedacht für Telegram.
 - Import = Zusammenführen über `id`: neu → hinzufügen, bekannt → neueres `updatedAt` gewinnt. Nichts doppelt.
+- Stehen fremde Namen in der Datei, fragt erst ein Sheet, wie sie heißen sollen (vorausgefüllt aus `nochmal_alias`). Die Umbenennung gilt auch für vorhandene Einträge (ohne `updatedAt` zu ändern). Beim Export werden die Namen über `nochmal_alias` zurückübersetzt, damit die andere Person ihre Einträge unter ihrem eigenen Namen bekommt.
 - Formatänderungen nur abwärtskompatibel (`v` hochzählen, alte Dateien weiter lesbar).
 - Bekannte iOS-Grenze: Homescreen-Web-Apps haben eigenen Speicher, Links aus Telegram öffnen nicht dorthin. Darum Datei statt Link.
 
@@ -65,8 +67,9 @@ Von oben nach unten:
    - „Neu von {from}“ aus `nochmal_inbox` (`inbox()`, `noteInbox()` im Import)
    - „Eure/Deine Lieblinge“: ✓-Gerichte, bei mehreren Autoren nur die, die alle mit ✓ bewertet haben; max. 10
    - Demo-Daten zählen mit.
-2. Suche, Küchen-Kacheln, Demo-Hinweis, Restaurantliste.
-- Dashboard nur ohne Suchtext und ohne Küchen-Filter (`dashOn()`). `renderList` schaltet nur `#dash.hidden` um – beim Tippen wird das Dashboard nie neu gerendert.
+2. Suche, Küchen-Kacheln, Personen-Leiste „Lieblinge von“ (ab 2 Personen), Demo-Hinweis, Restaurantliste.
+- Personen-Filter (`ui.person`, `renderPersonList`): zeigt statt Restaurants die Gerichte, die diese Person zuletzt mit ✓ bewertet hat; Suche und Küche filtern darin. Tippen öffnet Restaurant + Gericht.
+- Dashboard nur ohne Suchtext, Küchen- und Personen-Filter (`dashOn()`). `renderList` schaltet nur `#dash.hidden` um – beim Tippen wird das Dashboard nie neu gerendert.
 - Leerer Zustand (`emptyHTML()`): Roller + Tüte, „So geht’s“ in 3 Schritten, dann Erster Eintrag / Demo / Import.
 
 ## Arbeitsweise
