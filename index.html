@@ -50,11 +50,42 @@ svg{display:block;max-width:100%}
 .search svg{width:20px;height:20px;flex:none}
 .search input{flex:1;min-width:0;height:100%;background:none;border:0;outline:0}
 .search input::placeholder{color:var(--faint)}
-.chips{display:flex;gap:8px;overflow-x:auto;padding:6px 16px 12px;margin:0 -16px;scrollbar-width:none}
-.chips::-webkit-scrollbar{display:none}
-.chip{flex:none;display:flex;align-items:center;gap:7px;height:40px;padding:0 14px 0 7px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--muted);font-size:14px;font-weight:700;transition:background .2s,color .2s,border-color .2s}
-.chip.only{padding:0 16px}
-.chip[aria-pressed="true"]{background:var(--surface2);color:var(--text);border-color:var(--accent)}
+
+/* ---------- Küchen-Leiste & Lieblinge ---------- */
+.cats{display:flex;gap:8px;overflow-x:auto;padding:6px 16px 16px;margin:0 -16px;scrollbar-width:none;scroll-padding:0 16px}
+.cats::-webkit-scrollbar,.favs::-webkit-scrollbar,.photos::-webkit-scrollbar{display:none}
+.cats .cbtn{flex:none;position:relative;min-width:80px;padding:10px 10px 8px;white-space:nowrap}
+.cnt{position:absolute;top:5px;right:5px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;display:grid;place-items:center;background:var(--surface2);color:var(--muted);font-size:11px;font-weight:800;font-variant-numeric:tabular-nums;transition:background .2s,color .2s}
+.cbtn[aria-pressed="true"] .cnt{background:var(--c);color:var(--bg)}
+.shelf{display:flex;align-items:baseline;gap:8px;margin:4px 4px 10px;font-size:12.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.shelf small{font-size:12px;letter-spacing:0;color:var(--faint)}
+.favs{display:flex;gap:10px;overflow-x:auto;padding:0 16px 4px;margin:0 -16px 18px;scrollbar-width:none;scroll-snap-type:x proximity;scroll-padding:0 16px}
+.fav{--c:var(--accent);flex:none;width:140px;scroll-snap-align:start;text-align:left;border-radius:16px;background:var(--surface);border:1px solid var(--line);overflow:hidden;transition:transform .15s}
+.fav:active{transform:scale(.97)}
+.fimg{position:relative;display:grid;place-items:center;height:96px;background:color-mix(in srgb,var(--c) 16%,var(--surface2))}
+.fimg img{width:100%;height:100%;object-fit:cover}
+.fimg .ico{background:none;box-shadow:none}
+.fbadge{position:absolute;left:8px;top:8px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--good);color:#0d1f14;font-size:13px;font-weight:900;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.fav b{display:block;padding:9px 10px 0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fav small{display:block;padding:1px 10px 10px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ---------- Fotos ---------- */
+.thumb{position:relative;flex:none;width:54px;height:54px}
+.thumb img{width:100%;height:100%;object-fit:cover;border-radius:17px}
+.thumb .ico{position:absolute;right:-6px;bottom:-6px;box-shadow:0 0 0 3px var(--surface)}
+.dish.has-pic{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:start}
+.dish .pic{width:64px;height:64px;border-radius:12px;object-fit:cover}
+.dbody{min-width:0}
+.photos{display:flex;gap:8px;overflow-x:auto;margin:0 -18px 14px;padding:0 18px;scroll-snap-type:x mandatory;scroll-padding:0 18px;scrollbar-width:none}
+.photos img{flex:none;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:18px;scroll-snap-align:start;background:var(--surface)}
+.photos.multi img{width:86%}
+.pslot{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:88px;border-radius:16px;border:2px dashed var(--line);background:var(--surface);color:var(--muted);font-weight:750;font-size:15px;transition:opacity .2s}
+.pslot svg{width:24px;height:24px}
+.pslot.has{position:relative;display:block;border:0;overflow:hidden;animation:pop .3s cubic-bezier(.3,1.6,.5,1)}
+.pslot.has img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover}
+.pacts{position:absolute;right:8px;bottom:8px;display:flex;gap:6px}
+.pacts .mini-btn{height:44px;padding:0 14px;background:rgba(18,16,22,.75);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:var(--text);border-color:rgba(255,255,255,.15)}
+.busy{opacity:.5;pointer-events:none}
 
 /* ---------- Icons ---------- */
 .ico{--c:var(--accent);flex:none;width:54px;height:54px;border-radius:17px;display:grid;place-items:center;
@@ -111,6 +142,48 @@ svg{display:block;max-width:100%}
 .poke .o-spark{animation:oSpark 1s ease}
 @keyframes oLid{0%,100%{transform:none}35%,70%{transform:translate(-2px,-10px) rotate(-12deg)}}
 @keyframes oSpark{0%,25%,80%,100%{opacity:0;transform:scale(.4)}40%,68%{opacity:1;transform:scale(1)}}
+/* Pasta: Gabel dreht Nudeln auf */
+.poke .pa-fork{animation:paFork .9s ease-in-out}
+.poke .pa-nood{animation:paNood .9s ease-in-out}
+@keyframes paFork{0%,100%{transform:none}30%{transform:rotate(-28deg) translateY(2px)}65%{transform:rotate(18deg)}}
+@keyframes paNood{0%,100%{transform:none}30%{transform:scaleX(.94) translateY(-1px)}65%{transform:scaleX(1.04)}}
+/* Taco: Füllung hüpft */
+.poke .t-fill>*{animation:tHop .6s cubic-bezier(.3,1.6,.5,1)}
+.poke .t-fill>*:nth-child(2){animation-delay:.08s}
+.poke .t-fill>*:nth-child(3){animation-delay:.16s}
+.poke .t-shell{animation:tSquish .6s ease}
+@keyframes tHop{50%{transform:translateY(-6px)}}
+@keyframes tSquish{30%{transform:scale(1.05,.94)}}
+/* Bowl: Salat wird geschwenkt */
+.poke .bw-top>*{animation:bwToss .8s cubic-bezier(.3,1.4,.5,1)}
+.poke .bw-top>*:nth-child(even){animation-delay:.07s}
+@keyframes bwToss{40%{transform:translateY(-9px) rotate(14deg)}}
+/* Süßes: Donut dreht sich */
+.poke .sw-donut{animation:swSpin .8s cubic-bezier(.3,.7,.3,1)}
+@keyframes swSpin{to{transform:rotate(360deg)}}
+/* Schnitzel: Zitrone wird ausgedrückt */
+.sc-drop{opacity:0}
+.poke .sc-lemon{animation:scLemon 1s cubic-bezier(.3,.7,.3,1)}
+.poke .sc-drop{animation:scDrop 1s ease}
+@keyframes scLemon{0%,100%{transform:none}35%,60%{transform:translate(-3px,6px) rotate(-25deg) scale(.9,1)}}
+@keyframes scDrop{0%,40%{opacity:0;transform:none}55%{opacity:1}100%{opacity:0;transform:translateY(7px)}}
+/* Gyros & Falafel: Füllung hüpft */
+.poke .g-fill>*,.poke .f-balls>*{animation:tHop .6s cubic-bezier(.3,1.6,.5,1)}
+.poke .g-fill>*:nth-child(2),.poke .f-balls>*:nth-child(2){animation-delay:.08s}
+.poke .g-fill>*:nth-child(3),.poke .f-balls>*:nth-child(3){animation-delay:.16s}
+/* Hähnchen: Keule wackelt */
+.poke .ch-leg{animation:chWiggle .8s ease-in-out}
+@keyframes chWiggle{0%,100%{transform:none}25%{transform:rotate(-12deg)}50%{transform:rotate(10deg)}75%{transform:rotate(-5deg)}}
+/* Frühstück: Spiegelei wird gewendet */
+.poke .bf-pan{animation:bfPan .9s ease}
+.poke .bf-egg{animation:bfEgg .9s cubic-bezier(.3,1.4,.5,1)}
+@keyframes bfPan{0%,100%{transform:none}15%{transform:translateX(-3px) rotate(-3deg)}30%{transform:translateX(3px) rotate(2deg)}}
+@keyframes bfEgg{0%,25%,100%{transform:none}50%{transform:translateY(-10px) rotate(-160deg) scale(.9)}75%{transform:translateY(-2px) rotate(-360deg)}}
+/* Alle: Kacheln ploppen */
+.poke .a-sq>*{animation:pop .4s cubic-bezier(.3,1.6,.5,1) both}
+.poke .a-sq>*:nth-child(2){animation-delay:.06s}
+.poke .a-sq>*:nth-child(3){animation-delay:.12s}
+.poke .a-sq>*:nth-child(4){animation-delay:.18s}
 
 /* ---------- Karten ---------- */
 .list{display:grid;gap:10px}
@@ -203,6 +276,7 @@ textarea.inp{height:auto;min-height:84px;padding:12px 14px;resize:vertical;line-
 .row2{display:grid;grid-template-columns:1fr 112px;gap:10px}
 .cuisines{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:8px}
 .cbtn{--c:var(--accent);display:grid;justify-items:center;gap:6px;padding:10px 4px 8px;border-radius:16px;background:var(--surface);border:2px solid transparent;font-size:12px;font-weight:700;color:var(--muted);transition:border-color .2s,background .2s,color .2s}
+.cuisines .cbtn{padding:10px 2px 8px;text-align:center;-webkit-hyphens:auto;hyphens:auto;overflow-wrap:anywhere}
 .cbtn[aria-pressed="true"]{border-color:var(--c);color:var(--text);background:color-mix(in srgb,var(--c) 12%,var(--surface))}
 .verdicts{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .vbtn{position:relative;overflow:hidden;display:grid;justify-items:center;gap:4px;padding:14px 6px;border-radius:16px;background:var(--surface);border:2px solid transparent;color:var(--muted);font-weight:750;font-size:14px;transition:transform .15s,border-color .2s,background .2s,color .2s,box-shadow .2s}
@@ -291,6 +365,7 @@ html.theming *{transition:background-color .35s,border-color .35s,color .35s,box
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" hidden></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="fileIn" accept=".txt,.json,text/plain,application/json" hidden>
+<input type="file" id="photoIn" accept="image/*" hidden>
 
 <script>
 (() => {
@@ -312,11 +387,20 @@ const SYM = { good: '✓', ok: '~', bad: '✕', mixed: '±' };
 const SECTIONS = [['good', 'Wieder bestellen'], ['mixed', 'Geschmackssache'], ['ok', 'Geht so'], ['bad', 'Nie wieder']];
 const CUISINES = [
   { id: 'pizza',  label: 'Pizza',     c: '#ff7d6b' },
+  { id: 'pasta',  label: 'Pasta',     c: '#ffc27a' },
   { id: 'burger', label: 'Burger',    c: '#f2a65a' },
   { id: 'doener', label: 'Döner',     c: '#c9a27e' },
+  { id: 'schnitzel', label: 'Schnitzel & Deutsch', c: '#ffcf8a' },
+  { id: 'greek',  label: 'Griechisch', c: '#7fb2ff' },
+  { id: 'orient', label: 'Orientalisch', c: '#e0a07a' },
+  { id: 'chicken', label: 'Hähnchen', c: '#ffad8a' },
   { id: 'asia',   label: 'Asiatisch', c: '#6fd0f0' },
-  { id: 'curry',  label: 'Indisch',   c: '#f5cf4a' },
   { id: 'sushi',  label: 'Sushi',     c: '#f59ac5' },
+  { id: 'curry',  label: 'Indisch',   c: '#f5cf4a' },
+  { id: 'taco',   label: 'Mexikanisch', c: '#ff9466' },
+  { id: 'bowl',   label: 'Bowl & Salat', c: '#7fd6c2' },
+  { id: 'breakfast', label: 'Frühstück', c: '#ffe48a' },
+  { id: 'sweet',  label: 'Süßes',     c: '#e7a5ff' },
   { id: 'other',  label: 'Sonstiges', c: '#b69cff' }
 ];
 const CMAP = Object.fromEntries(CUISINES.map(c => [c.id, c]));
@@ -449,7 +533,72 @@ const ICONS = {
     <ellipse cx="32" cy="47" rx="25" ry="5" fill="#cfc8da"/>
     <g class="o-spark" fill="#ffe08a"><path d="M25 33 l1.6 3.6 3.6 1.6 -3.6 1.6 -1.6 3.6 -1.6 -3.6 -3.6 -1.6 3.6 -1.6Z"/><path d="M39 36 l1.1 2.4 2.4 1.1 -2.4 1.1 -1.1 2.4 -1.1 -2.4 -2.4 -1.1 2.4 -1.1Z"/></g>
     <g class="o-lid"><path d="M12 45 A20 20 0 0 1 52 45Z" style="fill:var(--c)"/><path d="M18 40 A14 14 0 0 1 27 29" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2.4" stroke-linecap="round"/><circle cx="32" cy="23" r="3.3" style="fill:var(--c)"/><rect x="10" y="44" width="44" height="3.2" rx="1.6" fill="#ece6f4"/></g>
-  </svg>`
+  </svg>`,
+  pasta: () => `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <ellipse cx="32" cy="45" rx="26" ry="8" fill="#ece6f2"/><ellipse cx="32" cy="44" rx="18" ry="5" fill="#d6cee0"/>
+    <g class="pa-nood"><path d="M12 43 Q13 22 32 21 Q51 22 52 43 Q32 48 12 43Z" fill="#f6d27a"/>
+      <g fill="none" stroke="#e2b04a" stroke-width="1.6" stroke-linecap="round"><path d="M16 38 q5 -6 10 0 q5 6 10 0 q5 -6 10 0"/><path d="M19 30 q4 -4 8 0 q4 4 8 0 q4 -4 8 0"/></g>
+      <ellipse cx="30" cy="25" rx="8" ry="3.6" fill="#e0533f"/><path d="M28 23 q3 -4 7 -2 q-3 4 -7 2Z" fill="#6fcf5b"/></g>
+    <g class="pa-fork"><path d="M41 30 L52 8" stroke="#d9d3e3" stroke-width="2.6" stroke-linecap="round"/><path d="M49.8 6.9 L54.2 9.1 M49.8 6.9 L52 2.4 M52 8 L54.2 3.5 M54.2 9.1 L56.4 4.6" fill="none" stroke="#d9d3e3" stroke-width="1.6" stroke-linecap="round"/></g>
+  </svg>`,
+  taco: () => `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <g class="t-fill"><path d="M13 39 Q32 25 51 39Z" fill="#8a4a26"/>
+      <g fill="#e0533f"><circle cx="22" cy="33" r="3.4"/><circle cx="38" cy="31.5" r="3.4"/></g>
+      <path d="M11 40 q3 -7 7 -3 q3 -7 7 -2 q3 -7 7 -2 q3 -7 7 -2 q3 -7 7 -2 q4 -5 6 2Z" fill="#7cc95a"/></g>
+    <g class="t-shell"><path d="M9 39 A23 20 0 0 0 55 39Z" fill="#f2c14e"/><g fill="#d9a23a"><ellipse cx="21" cy="46" rx="2" ry="1.2"/><ellipse cx="34" cy="52" rx="2" ry="1.2"/><ellipse cx="44" cy="44" rx="2" ry="1.2"/></g>
+      <path d="M9 39 H55" stroke="rgba(255,255,255,.45)" stroke-width="1.5"/></g>
+  </svg>`,
+  bowl: () => `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <g class="bw-top"><path d="M13 34 q6 -11 17 -5 q-8 8 -17 5Z" fill="#7cc95a"/><rect x="27" y="24" width="8" height="6" rx="1.6" fill="#ff8a65"/>
+      <path d="M33 32 q8 -11 18 -3 q-9 7 -18 3Z" fill="#5fb04a"/><path d="M21 28 q3 -8 10 -6 q-1 7 -10 6Z" fill="#cfe58a"/><circle cx="44" cy="25" r="3.6" fill="#e0533f"/></g>
+    <path d="M8 33 H56 Q54 53 32 53 Q10 53 8 33Z" style="fill:var(--c)"/>
+    <path d="M8 33 H56" stroke="rgba(255,255,255,.45)" stroke-width="2"/>
+    <path d="M14 41 Q22 49 32 49" fill="none" stroke="rgba(0,0,0,.1)" stroke-width="3" stroke-linecap="round"/>
+  </svg>`,
+  sweet: () => `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <g class="sw-donut"><circle cx="32" cy="33" r="21" fill="#d9924c"/><circle cx="32" cy="33" r="16.5" fill="#f59ac5"/>
+      <circle cx="32" cy="33" r="6.5" stroke="#b9743a" stroke-width="1.5" style="fill:color-mix(in srgb,var(--c) 18%,var(--surface2))"/>
+      <g stroke-width="2" stroke-linecap="round"><path d="M22 26 l3 -1.5" stroke="#fff4dc"/><path d="M40 22 l2.5 2" stroke="#6fd0f0"/><path d="M44 36 l-1 3" stroke="#ffc83d"/><path d="M24 40 l3 1.5" stroke="#8b8cff"/><path d="M33 45 l3 -1" stroke="#fff4dc"/><path d="M30 21 l2.6 1" stroke="#7cc95a"/></g></g>
+  </svg>`,
+  schnitzel: () => `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <ellipse cx="32" cy="45" rx="27" ry="9" fill="#ece6f2"/>
+    <path d="M10 40 Q9 30 20 27 Q30 22 42 26 Q55 28 53 38 Q52 46 38 47 Q20 49 10 40Z" fill="#c9792f"/>
+    <path d="M13 38 Q13 31 22 29 Q31 25 41 28 Q51 30 50 37 Q49 43 37 44 Q21 46 13 38Z" fill="#e3a14a"/>
+    <g fill="#b8682a"><circle cx="22" cy="34" r="1.2"/><circle cx="30" cy="31" r="1"/><circle cx="38" cy="38" r="1.2"/><circle cx="44" cy="33" r="1"/><circle cx="27" cy="40" r="1"/></g>
+    <g class="sc-drop" fill="#fff6b0"><circle cx="43" cy="28" r="1.5"/><circle cx="39" cy="31" r="1.1"/></g>
+    <g class="sc-lemon"><circle cx="48" cy="18" r="8" fill="#ffe14d"/><circle cx="48" cy="18" r="6" fill="#fff3a6"/><path d="M48 12 V24 M42 18 H54 M43.8 13.8 L52.2 22.2 M52.2 13.8 L43.8 22.2" stroke="#ffe14d" stroke-width="1.2"/></g>
+  </svg>`,
+  greek: () => `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <g class="g-fill"><path d="M17 25 q3 -8 8 -4 q4 -7 8 -2 q5 -6 9 0 q4 -4 7 4Z" fill="#7cc95a"/>
+      <g fill="#e0533f"><circle cx="24" cy="21" r="2.8"/><circle cx="39" cy="20" r="2.8"/></g>
+      <path d="M27 19 q5 -6 10 0 q-5 3 -10 0Z" fill="#fbf7f0"/></g>
+    <path d="M15 24 Q32 31 49 24 L36 57 Q32 61 28 57Z" fill="#f0d39a"/>
+    <path d="M22 30 L42 30 L40 35 L24 35Z" fill="#a0522d"/>
+    <path d="M20 39 Q32 44 44 39 L36 57 Q32 61 28 57Z" style="fill:var(--c)"/>
+    <path d="M22 43 Q32 47 42 43" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1.5"/>
+  </svg>`,
+  orient: () => `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <ellipse cx="32" cy="46" rx="26" ry="8" fill="#ece6f2"/><ellipse cx="32" cy="44.5" rx="20" ry="5.5" fill="#f1dcae"/>
+    <path d="M20 45 q12 -5 24 0" fill="none" stroke="#d9bd84" stroke-width="1.6"/>
+    <g class="f-balls"><g><circle cx="21" cy="38" r="7" fill="#8a5a2b"/><circle cx="19" cy="36" r="2" fill="#b07a3e"/></g>
+      <g><circle cx="43" cy="38" r="7" fill="#7a4e24"/><circle cx="41" cy="36" r="2" fill="#a9733a"/></g>
+      <g><circle cx="32" cy="31" r="7.5" fill="#94622f"/><circle cx="30" cy="29" r="2.2" fill="#bb8444"/></g></g>
+    <path d="M46 25 q4 -6 9 -3 q-4 5 -9 3Z" fill="#6fcf5b"/>
+  </svg>`,
+  chicken: () => `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <g class="ch-leg"><path d="M33 39 L46 50" stroke="#f4efe9" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="48" cy="48" r="3.4" fill="#f4efe9"/><circle cx="45" cy="52" r="3.4" fill="#f4efe9"/>
+      <path d="M14 30 Q12 16 26 13 Q40 11 42 24 Q43 33 36 38 L30 42 Q20 46 15 38Z" fill="#d98a3a"/>
+      <path d="M18 28 Q18 19 27 17" fill="none" stroke="rgba(255,230,180,.55)" stroke-width="3" stroke-linecap="round"/>
+      <g fill="#b86a24"><circle cx="30" cy="24" r="1.2"/><circle cx="24" cy="33" r="1.1"/><circle cx="35" cy="31" r="1"/></g></g>
+  </svg>`,
+  breakfast: () => `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <g class="bf-pan"><path d="M44 42 L59 52" stroke="#8d8599" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="28" cy="33" r="22" fill="#8d8599"/><circle cx="28" cy="33" r="19" fill="#2b2533"/>
+      <g class="bf-egg"><path d="M15 33 Q14 22 25 21 Q36 19 39 29 Q41 41 29 44 Q16 45 15 33Z" fill="#fbf7f0"/><circle cx="27" cy="32" r="6" fill="#ffb627"/><circle cx="25" cy="30" r="1.8" fill="#ffe08a"/></g></g>
+  </svg>`,
+  all: () => `<svg viewBox="0 0 64 64" aria-hidden="true"><g class="a-sq" style="fill:var(--c)">
+    <rect x="12" y="12" width="17" height="17" rx="5"/><rect x="35" y="12" width="17" height="17" rx="5" opacity=".7"/><rect x="12" y="35" width="17" height="17" rx="5" opacity=".7"/><rect x="35" y="35" width="17" height="17" rx="5" opacity=".45"/></g></svg>`
 };
 const ico = (id, size = '', color) => { const c = CMAP[id] || CMAP.other; return `<span class="ico ${size}" style="--c:${color || c.c}" data-poke>${(ICONS[id] || ICONS.other)()}</span>`; };
 function poke(el) {
@@ -462,7 +611,8 @@ const SVG = {
   search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
   share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M7 8l5-5 5 5"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>',
-  inbox: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>'
+  inbox: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>',
+  camera: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg>'
 };
 const SCOOTER = `<svg viewBox="-24 0 144 72" aria-hidden="true">
   <g class="speed" stroke="rgba(244,239,233,.55)" stroke-width="2.5" stroke-linecap="round"><path d="M-22 26 H2"/><path d="M-16 38 H6"/><path d="M-22 50 H-2"/></g>
@@ -486,6 +636,38 @@ const SCOOTER = `<svg viewBox="-24 0 144 72" aria-hidden="true">
   <g class="wheel"><circle cx="88" cy="57" r="9" fill="#2b2533" stroke="#e7e2ee" stroke-width="3"/><path d="M88 50 V64 M81 57 H95" stroke="#8d8599" stroke-width="2"/></g>
 </svg>`;
 
+/* ===================== Fotos (IndexedDB) ===================== */
+// Fotos sind zu groß für localStorage → eigene IndexedDB „nochmal“ (bleibt lokal auf dem Gerät, kostet nichts).
+// Schlüssel = Eintrags-id, Wert = JPEG-Data-URL. Beim Start einmal komplett in `photos` geladen, damit das Rendern synchron bleibt.
+const photos = new Map();
+let idbP = null;
+const idb = () => idbP || (idbP = new Promise((res, rej) => {
+  const r = indexedDB.open('nochmal', 1);
+  r.onupgradeneeded = () => r.result.createObjectStore('photos');
+  r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+}));
+async function idbRun(mode, fn) {
+  const db = await idb();
+  return new Promise((res, rej) => { const tx = db.transaction('photos', mode); fn(tx.objectStore('photos')); tx.oncomplete = () => res(true); tx.onerror = tx.onabort = () => rej(tx.error); });
+}
+async function loadPhotos() {
+  try { await idbRun('readonly', st => { const c = st.openCursor(); c.onsuccess = () => { const cur = c.result; if (cur) { photos.set(cur.key, cur.value); cur.continue(); } }; }); } catch (e) {}
+}
+// Map sofort aktualisieren (für die Anzeige), IndexedDB im Hintergrund. Liefert false, wenn das Speichern scheitert.
+function setPhotos(map) {
+  for (const [id, p] of map) if (p) photos.set(id, p); else photos.delete(id);
+  if (!map.size) return Promise.resolve(true);
+  return idbRun('readwrite', st => { for (const [id, p] of map) if (p) st.put(p, id); else st.delete(id); }).catch(() => false);
+}
+const setPhoto = (id, p) => setPhotos(new Map([[id, p]]));
+const photoOf = e => photos.get(e.id) || null;
+// Fotos aus der ersten Foto-Version lagen noch im localStorage → umziehen
+async function migratePhotos() {
+  const old = entries.filter(e => 'photo' in e);
+  if (!old.length) return;
+  if (await setPhotos(new Map(old.filter(e => e.photo).map(e => [e.id, e.photo])))) { old.forEach(e => { delete e.photo; }); persist(); }
+}
+
 /* ===================== Daten ableiten ===================== */
 const live = () => entries.filter(e => !e.deleted);
 function groupDishes(es) {
@@ -496,6 +678,7 @@ function groupDishes(es) {
     d.name = d.entries[0].dish;
     d.price = d.entries.find(e => e.price != null)?.price ?? null;
     d.note = d.entries.find(e => e.note)?.note || '';
+    d.photos = d.entries.map(photoOf).filter(Boolean); d.photo = d.photos[0] || null;
     const by = new Map(); for (const e of d.entries) if (!by.has(e.author)) by.set(e.author, e);
     d.byAuthor = [...by.values()];
     const vs = new Set(d.byAuthor.map(e => e.verdict));
@@ -510,6 +693,7 @@ function groupRestaurants() {
   return [...map.values()].map(r => {
     r.entries.sort((a, b) => b.createdAt - a.createdAt);
     r.name = r.entries[0].restaurant; r.cuisine = r.entries[0].cuisine;
+    r.photo = r.entries.map(photoOf).find(Boolean) || null;
     r.last = Math.max(...r.entries.map(e => e.updatedAt));
     r.dishes = groupDishes(r.entries);
     r.tally = { good: 0, mixed: 0, ok: 0, bad: 0 }; r.dishes.forEach(d => r.tally[d.status]++);
@@ -554,17 +738,15 @@ function renderHome(opts = {}) {
       <div class="btns"><button class="btn primary" data-act="add">Ersten Eintrag anlegen</button><button class="btn ghost" data-act="demo">Demo-Daten ansehen</button><button class="btn ghost" data-act="import">${SVG.inbox} Datei importieren</button></div></div>`;
     return;
   }
-  view.innerHTML = headerHTML() + `<div class="searchwrap"><label class="search">${SVG.search}<input id="q" type="search" placeholder="Restaurant oder Gericht suchen" value="${esc(ui.q)}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Suchen"></label></div><div class="chips" id="chips"></div>${hasDemo() ? `<div class="demo-banner"><span><b>Demo-Daten aktiv</b> – werden nie geteilt oder exportiert</span><button data-act="remove-demo">Entfernen</button></div>` : ''}<div id="list"></div>`;
+  view.innerHTML = headerHTML() + `<div class="searchwrap"><label class="search">${SVG.search}<input id="q" type="search" placeholder="Restaurant oder Gericht suchen" value="${esc(ui.q)}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Suchen"></label></div><div class="cats" id="cats"></div>${hasDemo() ? `<div class="demo-banner"><span><b>Demo-Daten aktiv</b> – werden nie geteilt oder exportiert</span><button data-act="remove-demo">Entfernen</button></div>` : ''}<div id="favs"></div><div id="list"></div>`;
   renderList(opts.stagger);
 }
 function renderList(stagger) {
-  const all = groupRestaurants();
-  const present = new Set(all.map(r => r.cuisine));
-  if (ui.cuisine !== 'all' && !present.has(ui.cuisine)) ui.cuisine = 'all';
-  const shown = CUISINES.filter(c => present.has(c.id));
-  $('#chips').innerHTML = shown.length < 2 ? '' :
-    `<button class="chip only" data-act="cuisine" data-c="all" aria-pressed="${ui.cuisine === 'all'}">Alle</button>` +
-    shown.map(c => `<button class="chip" data-act="cuisine" data-c="${c.id}" aria-pressed="${ui.cuisine === c.id}">${ico(c.id, 'mini')}${esc(c.label)}</button>`).join('');
+  const all = groupRestaurants(), count = {};
+  for (const r of all) count[r.cuisine] = (count[r.cuisine] || 0) + 1;
+  if (ui.cuisine !== 'all' && !count[ui.cuisine]) ui.cuisine = 'all';
+  $('#cats').innerHTML = catHTML('all', 'Alle', all.length, 'var(--accent)') +
+    CUISINES.filter(c => count[c.id]).map(c => catHTML(c.id, c.label, count[c.id], c.c)).join('');
 
   const q = norm(ui.q); const hits = new Map();
   let list = all.filter(r => ui.cuisine === 'all' || r.cuisine === ui.cuisine);
@@ -574,6 +756,9 @@ function renderList(stagger) {
     return norm(r.name).includes(q) || dh.length;
   });
   const el = $('#list');
+  // Lieblinge: alles mit ✓, neueste zuerst – nur ohne Suche, damit die Treffer oben stehen
+  const favs = q ? [] : list.flatMap(r => r.dishes.filter(d => d.status === 'good').map(d => ({ r, d }))).sort((a, b) => b.d.last - a.d.last).slice(0, 12);
+  $('#favs').innerHTML = favs.length ? `<h4 class="shelf">Lieblinge</h4><div class="favs">${favs.map(favHTML).join('')}</div><h4 class="shelf">Restaurants <small>${list.length}</small></h4>` : '';
   if (!list.length) {
     el.className = '';
     el.innerHTML = q
@@ -583,6 +768,12 @@ function renderList(stagger) {
   }
   el.className = 'list' + (stagger ? ' stagger' : '');
   el.innerHTML = list.map((r, i) => cardHTML(r, i, hits.get(r.key))).join('');
+}
+const catHTML = (id, label, n, color) => `<button class="cbtn" data-act="cuisine" data-c="${id}" style="--c:${color}" aria-pressed="${ui.cuisine === id}">${ico(id, 'mid', color)}${esc(label)}<span class="cnt">${n}</span></button>`;
+function favHTML({ r, d }) {
+  const c = CMAP[r.cuisine] || CMAP.other;
+  return `<button class="fav" data-act="fav" data-key="${esc(r.key)}" data-dish="${esc(d.key)}" style="--c:${c.c}">
+    <span class="fimg">${d.photo ? `<img src="${esc(d.photo)}" alt="" loading="lazy">` : ico(r.cuisine, 'big')}<span class="fbadge">✓</span></span><b>${esc(d.name)}</b><small>${esc(r.name)}</small></button>`;
 }
 function cardHTML(r, i, hit) {
   const c = CMAP[r.cuisine] || CMAP.other;
@@ -595,7 +786,7 @@ function cardHTML(r, i, hit) {
   }
   const fresh = r.entries.some(e => ui.fresh.has(e.id));
   return `<button class="card${fresh ? ' fresh' : ''}" data-act="open" data-key="${esc(r.key)}" style="--i:${Math.min(i, 12)}">
-    ${ico(r.cuisine)}<div class="cbody"><h3>${esc(r.name)}</h3><div class="sub">${esc(c.label)} · ${relDate(r.last)}</div><div class="tally">${pillsHTML(r.tally)}</div><div class="peek">${peek}</div></div></button>`;
+    ${r.photo ? `<span class="thumb"><img src="${esc(r.photo)}" alt="" loading="lazy">${ico(r.cuisine, 'mini')}</span>` : ico(r.cuisine)}<div class="cbody"><h3>${esc(r.name)}</h3><div class="sub">${esc(c.label)} · ${relDate(r.last)}</div><div class="tally">${pillsHTML(r.tally)}</div><div class="peek">${peek}</div></div></button>`;
 }
 function renderDetail(opts = {}) {
   const r = currentRestaurant();
@@ -613,10 +804,11 @@ function renderDetail(opts = {}) {
 }
 function dishHTML(d, i) {
   const fresh = d.entries.some(e => ui.fresh.has(e.id));
-  return `<button class="dish ${d.status}${fresh ? ' fresh' : ''}" data-act="dish" data-dish="${esc(d.key)}" style="--i:${Math.min(i, 12)}">
+  return `<button class="dish ${d.status}${d.photo ? ' has-pic' : ''}${fresh ? ' fresh' : ''}" data-act="dish" data-dish="${esc(d.key)}" style="--i:${Math.min(i, 12)}">
+    ${d.photo ? `<img class="pic" src="${esc(d.photo)}" alt="" loading="lazy">` : ''}<div class="dbody">
     <div class="row1"><span class="name">${esc(d.name)}</span>${d.price != null ? `<span class="price">${fmtPrice(d.price)}</span>` : ''}</div>
     <div class="votes">${d.byAuthor.map(e => `<span class="vote ${e.verdict}"><span class="sym">${VERDICT[e.verdict].sym}</span>${esc(e.author)}</span>`).join('')}${d.entries.length > 1 ? `<span class="count">${d.entries.length}× bewertet</span>` : ''}</div>
-    ${d.note ? `<div class="note">„${esc(d.note)}“</div>` : ''}
+    ${d.note ? `<div class="note">„${esc(d.note)}“</div>` : ''}</div>
     ${d.status === 'bad' ? '<span class="stamp">Nie wieder</span>' : ''}</button>`;
 }
 
@@ -652,8 +844,15 @@ function openSettings() {
     </div><p class="hint">Grün, Gelb und Rot sind für die Ampel reserviert. Eine Akzentfarbe in diesen Tönen macht das Urteil schwerer lesbar.</p></div>
     <div class="set-group"><span class="lbl">Teilen & Sichern</span><div class="btns"><button class="btn ghost" data-act="export-all">${SVG.share} Alles exportieren</button><button class="btn ghost" data-act="import">${SVG.inbox} Datei importieren</button></div><p class="hint">Die Datei kannst du per Telegram schicken. Beim Import wird zusammengeführt – nichts landet doppelt, die neuere Version gewinnt.</p></div>
     <div class="set-group"><label class="toggle"><span><b>Animationen</b><small>Stempel, Roller & Co.</small></span><input type="checkbox" id="f-anim" ${animPref ? 'checked' : ''}><span class="sw"></span></label></div>
-    <div class="set-group"><span class="lbl">Daten</span><div class="btns">${hasDemo() ? '<button class="btn ghost" data-act="remove-demo">Demo-Daten entfernen</button>' : live().length ? '' : '<button class="btn ghost" data-act="demo">Demo-Daten laden</button>'}<button class="btn danger" data-act="reset">Alle Daten auf diesem Gerät löschen</button></div><p class="hint">Alles bleibt nur auf diesem Gerät. Exportiere ab und zu als Backup.</p></div>
-    <div class="btns"><button class="btn primary" data-act="save-settings">Fertig</button></div>`);
+    <div class="set-group"><span class="lbl">Daten</span><div class="btns">${hasDemo() ? '<button class="btn ghost" data-act="remove-demo">Demo-Daten entfernen</button>' : live().length ? '' : '<button class="btn ghost" data-act="demo">Demo-Daten laden</button>'}<button class="btn danger" data-act="reset">Alle Daten auf diesem Gerät löschen</button></div><p class="hint">Alles bleibt nur auf diesem Gerät. Exportiere ab und zu als Backup. <span id="storage"></span></p></div>
+    <div class="btns"><button class="btn primary" data-act="save-settings">Fertig</button></div>`, showStorage);
+}
+// Speicherbedarf nachträglich ins Einstellungs-Sheet schreiben (estimate ist async)
+async function showStorage() {
+  const n = live().filter(photoOf).length;
+  let txt = `${n} Foto${n === 1 ? '' : 's'}`;
+  try { const { usage } = await navigator.storage.estimate(); txt += ` · belegt ca. ${(usage / 1e6).toLocaleString('de-DE', { maximumFractionDigits: 1 })} MB`; } catch (e) {}
+  const el = $('#storage'); if (el) el.textContent = txt + '.';
 }
 function openDish(dKey) {
   const r = currentRestaurant(); if (!r) return;
@@ -661,6 +860,7 @@ function openDish(dKey) {
   ui.dishCtx = { rName: r.name, cuisine: r.cuisine, name: d.name, entries: d.entries };
   openSheet(`<button class="grab" data-act="close" aria-label="Schließen"></button>
     <div class="sh-head">${ico(r.cuisine, 'mid')}<div><h2>${esc(d.name)}</h2><div class="sub">${esc(r.name)}${d.price != null ? ' · ' + fmtPrice(d.price) : ''}</div></div></div>
+    ${d.photos.length ? `<div class="photos${d.photos.length > 1 ? ' multi' : ''}">${d.photos.map(p => `<img src="${esc(p)}" alt="Foto: ${esc(d.name)}">`).join('')}</div>` : ''}
     <div class="hist">${d.entries.map(e => `<div class="hitem"><span class="vote ${e.verdict}"><span class="sym">${VERDICT[e.verdict].sym}</span>${VERDICT[e.verdict].short}</span>
       <div class="hmeta"><b>${esc(e.author)}</b> · ${relDate(e.createdAt)}${e.price != null ? ' · ' + fmtPrice(e.price) : ''}${e.note ? `<div class="note">„${esc(e.note)}“</div>` : ''}</div>
       ${e.author === user ? `<button class="mini-btn" data-act="edit" data-id="${esc(e.id)}">Ändern</button>` : '<span></span>'}</div>`).join('')}</div>
@@ -671,7 +871,7 @@ function openEditor({ id = null, restaurant = '', cuisine = null, dish = '' } = 
   const rs = groupRestaurants();
   const rName = e ? e.restaurant : restaurant;
   const match = rs.find(r => r.key === norm(rName));
-  ui.edit = { id, st: { verdict: e ? e.verdict : null, cuisine: e ? e.cuisine : (cuisine || match?.cuisine || 'other') } };
+  ui.edit = { id, st: { verdict: e ? e.verdict : null, cuisine: e ? e.cuisine : (cuisine || match?.cuisine || 'other'), photo: e ? photoOf(e) : null } };
   const st = ui.edit.st;
   openSheet(`<button class="grab" data-act="close" aria-label="Schließen"></button><h2>${e ? 'Eintrag ändern' : 'Wie war’s?'}</h2>
     <div class="field"><label for="f-r">Restaurant</label><input class="inp" id="f-r" list="dl-r" value="${esc(rName)}" placeholder="z. B. Sultan Kebab" autocomplete="off" autocapitalize="words" enterkeyhint="next"><datalist id="dl-r">${rs.map(r => `<option value="${esc(r.name)}">`).join('')}</datalist></div>
@@ -679,9 +879,28 @@ function openEditor({ id = null, restaurant = '', cuisine = null, dish = '' } = 
     <div class="field row2"><div><label for="f-d">Gericht</label><input class="inp" id="f-d" list="dl-d" value="${esc(e ? e.dish : dish)}" placeholder="z. B. Lamm-Dürüm" autocomplete="off" enterkeyhint="next"><datalist id="dl-d"></datalist></div>
       <div><label for="f-p">Preis</label><input class="inp" id="f-p" inputmode="decimal" placeholder="9,50" value="${e && e.price != null ? String(e.price).replace('.', ',') : ''}" enterkeyhint="next"></div></div>
     <div class="field"><span class="lbl">Urteil</span><div class="verdicts" id="verdicts">${['good', 'ok', 'bad'].map(v => `<button type="button" class="vbtn ${v}" data-act="verdict" data-v="${v}" aria-pressed="${st.verdict === v}"><span class="sym">${VERDICT[v].sym}</span>${VERDICT[v].short}</button>`).join('')}</div></div>
+    <div class="field"><span class="lbl">Foto <span style="font-weight:500">(optional)</span></span><div id="photo-slot">${photoSlotHTML(st.photo)}</div></div>
     <div class="field"><label for="f-n">Notiz <span style="font-weight:500">(optional)</span></label><textarea class="inp" id="f-n" rows="3" placeholder="Was war gut, was nicht? Kam es warm an?">${esc(e ? e.note : '')}</textarea></div>
     <div class="btns"><button class="btn primary" data-act="save">Speichern</button>${e ? '<button class="btn danger" data-act="delete">Löschen</button>' : ''}</div>`,
     () => fillDishList(match));
+}
+const photoSlotHTML = p => p
+  ? `<div class="pslot has"><img src="${esc(p)}" alt="Foto vom Gericht"><div class="pacts"><button type="button" class="mini-btn" data-act="pick-photo">Ändern</button><button type="button" class="mini-btn" data-act="drop-photo">Entfernen</button></div></div>`
+  : `<button type="button" class="pslot" data-act="pick-photo">${SVG.camera}Foto hinzufügen</button>`;
+const syncPhoto = () => { const s = $('#photo-slot'); if (s) s.innerHTML = photoSlotHTML(ui.edit.st.photo); };
+// Handyfotos sind mehrere MB groß → auf Bildschirmgröße rechnen (scharf auf dem iPhone, Exportdatei bleibt handlich)
+async function shrinkPhoto(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+    const k = Math.min(1, 1200 / Math.max(img.naturalWidth, img.naturalHeight));
+    const cv = document.createElement('canvas');
+    cv.width = Math.round(img.naturalWidth * k); cv.height = Math.round(img.naturalHeight * k);
+    cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+    let q = 0.8, out = cv.toDataURL('image/jpeg', q);
+    while (out.length > 350000 && q > 0.45) { q -= 0.1; out = cv.toDataURL('image/jpeg', q); }
+    return out;
+  } finally { URL.revokeObjectURL(url); }
 }
 function fillDishList(r) { const dl = $('#dl-d'); if (dl) dl.innerHTML = r ? r.dishes.map(d => `<option value="${esc(d.name)}">`).join('') : ''; }
 function syncCuisineBtns(doPoke) {
@@ -722,13 +941,17 @@ function saveEntry() {
   if (!st.verdict) { restart($('#verdicts'), 'thud'); return toast('Wie war’s? Tipp auf die Ampel.'); }
   const existing = groupRestaurants().find(r => r.key === norm(restaurant));
   const rName = existing ? existing.name : restaurant; // gleiche Schreibweise beibehalten
-  const now = Date.now(); let id;
+  const now = Date.now(), photo = st.photo || null; let id;
   if (isEdit) {
     const e = entries.find(x => x.id === ui.edit.id);
     Object.assign(e, { restaurant: rName, cuisine: st.cuisine, dish, price, verdict: st.verdict, note, updatedAt: now }); id = e.id;
   } else {
     id = uuid();
     entries.push({ id, restaurant: rName, cuisine: st.cuisine, dish, price, verdict: st.verdict, note, author: user, createdAt: now, updatedAt: now, deleted: false });
+  }
+  if (photo !== (photos.get(id) || null)) {
+    setPhoto(id, photo).then(ok => { if (!ok) toast('Foto konnte nicht gespeichert werden'); });
+    if (photo) try { navigator.storage?.persist?.(); } catch (e) {} // bittet den Browser, die Fotos nicht aufzuräumen
   }
   persist(); closeSheet();
   ui.fresh = new Set([id]); setTimeout(() => ui.fresh.clear(), 4000);
@@ -749,12 +972,15 @@ function deleteEntry() {
   const e = entries.find(x => x.id === ui.edit.id); if (!e) return;
   if (!confirm('Diesen Eintrag löschen?')) return;
   e.deleted = true; e.updatedAt = Date.now(); // Lösch-Markierung, damit der Import ihn nicht zurückholt
+  setPhoto(e.id, null);
   persist(); closeSheet(); rerender(); toast('Gelöscht');
 }
 
 /* ===================== Teilen / Import ===================== */
 function payload(list, header) {
-  const json = JSON.stringify({ app: 'nochmal', v: 1, from: user, exportedAt: Date.now(), entries: list });
+  // v2: Einträge können ein Foto (photo) haben – alte v1-Dateien bleiben lesbar
+  const withPhotos = list.map(e => photos.has(e.id) ? { ...e, photo: photos.get(e.id) } : e);
+  const json = JSON.stringify({ app: 'nochmal', v: 2, from: user, exportedAt: Date.now(), entries: withPhotos });
   return `${header}\n\nIn „Nochmal?“ öffnen: Einstellungen → Datei importieren.\n---\n${json}`;
 }
 async function shareFile(name, text, title) {
@@ -797,17 +1023,23 @@ function clean(x) {
   const num = t => Number.isFinite(+t) && +t > 0 ? +t : Date.now();
   return { id: x.id.slice(0, 64), restaurant, cuisine: CMAP[x.cuisine] ? x.cuisine : 'other', dish,
     price: typeof x.price === 'number' && isFinite(x.price) ? Math.round(x.price * 100) / 100 : null,
-    verdict: x.verdict, note: s(x.note, 500), author: s(x.author, 24) || 'Unbekannt',
+    verdict: x.verdict, note: s(x.note, 500),
+    photo: typeof x.photo === 'string' && x.photo.length < 1500000 && /^data:image\/(jpeg|png|webp);base64,[a-z0-9+/]+=*$/i.test(x.photo) ? x.photo : null,
+    author: s(x.author, 24) || 'Unbekannt',
     createdAt: num(x.createdAt), updatedAt: num(x.updatedAt), deleted: !!x.deleted };
 }
 function merge(list) {
-  const byId = new Map(entries.map(e => [e.id, e])); let added = 0, updated = 0; const fresh = new Set();
+  const byId = new Map(entries.map(e => [e.id, e])); let added = 0, updated = 0; const fresh = new Set(), pics = new Map();
   for (const raw of list) {
-    const x = clean(raw); if (!x) continue;
+    const c = clean(raw); if (!c) continue;
+    const { photo, ...x } = c; // Foto gehört in die IndexedDB, nicht in den Eintrag
     const ex = byId.get(x.id);
     if (!ex) { entries.push(x); byId.set(x.id, x); if (!x.deleted) { added++; fresh.add(x.id); } }
     else if (x.updatedAt > ex.updatedAt) { Object.assign(ex, x); updated++; if (!x.deleted) fresh.add(x.id); }
+    else continue;
+    if (photo || photos.has(x.id)) pics.set(x.id, x.deleted ? null : photo);
   }
+  if (pics.size) setPhotos(pics).then(ok => { if (!ok) toast('Fotos konnten nicht gespeichert werden'); });
   if (added || updated) persist();
   return { added, updated, fresh };
 }
@@ -825,6 +1057,14 @@ $('#fileIn').addEventListener('change', async ev => {
   const from = data.from && data.from !== user ? data.from : null;
   scooter('rtl', from ? `Post von ${from}!` : 'Backup da!');
   toast([res.added && `${res.added} neu`, res.updated && `${res.updated} aktualisiert`].filter(Boolean).join(' · '));
+});
+
+$('#photoIn').addEventListener('change', async ev => {
+  const f = ev.target.files[0]; ev.target.value = ''; if (!f || !ui.edit) return;
+  const slot = $('#photo-slot'); slot?.classList.add('busy');
+  try { ui.edit.st.photo = await shrinkPhoto(f); syncPhoto(); }
+  catch (e) { toast('Das Foto ließ sich nicht laden'); }
+  finally { slot?.classList.remove('busy'); }
 });
 
 /* ===================== Demo ===================== */
@@ -847,7 +1087,15 @@ const DEMO_ROWS = [
     ['Burger Bros', 'burger', 'Smash Burger', 12.9, 'good', me, '', 15],
     ['Burger Bros', 'burger', 'Süßkartoffel-Pommes', 4.9, 'bad', me, 'Kamen komplett pappig an', 15],
     ['Sushi Circle', 'sushi', 'Lachs-Avocado-Maki', 8.9, 'good', g, '', 8],
-    ['Sushi Circle', 'sushi', 'Crunchy Roll', 11.9, 'ok', me, 'Zu viel Mayo', 8]
+    ['Sushi Circle', 'sushi', 'Crunchy Roll', 11.9, 'ok', me, 'Zu viel Mayo', 8],
+    ['Pasta Fresca', 'pasta', 'Cacio e Pepe', 13.5, 'good', me, 'Auch nach 30 Minuten noch cremig', 4],
+    ['Pasta Fresca', 'pasta', 'Lasagne', 12.9, 'ok', g, '', 4],
+    ['Taco Loco', 'taco', 'Birria Tacos', 12.9, 'good', g, 'Die Brühe zum Dippen!', 7],
+    ['Taco Loco', 'taco', 'Nachos Supreme', 9.5, 'bad', me, 'Matschig angekommen', 7],
+    ['Green Bowl', 'bowl', 'Poke Bowl Lachs', 13.9, 'good', me, '', 10],
+    ['Gasthaus Krone', 'schnitzel', 'Wiener Schnitzel', 16.9, 'good', me, 'Kam tatsächlich knusprig an', 13],
+    ['Gasthaus Krone', 'schnitzel', 'Jägerschnitzel', 15.5, 'ok', g, 'Soße extra wäre besser', 13],
+    ['Sweet Spot', 'sweet', 'Zimtschnecken (4er)', 8.5, 'good', g, '', 11]
 ];
 function demo() {
   const D = 86400000, n = Date.now();
@@ -858,7 +1106,7 @@ function demo() {
   persist();
 }
 const hasDemo = () => entries.some(e => e.demo);
-function removeDemo() { entries = entries.filter(e => !e.demo); persist(); }
+function removeDemo() { setPhotos(new Map(entries.filter(e => e.demo).map(e => [e.id, null]))); entries = entries.filter(e => !e.demo); persist(); }
 // Demo-Daten aus der allerersten Version hatten noch keine Markierung → an Restaurant+Gericht+Preis+Notiz erkennen
 function migrateLegacyDemo() {
   const sig = new Set(DEMO_ROWS.map(r => `${r[0]}|${r[2]}|${r[3]}|${r[6]}`));
@@ -892,7 +1140,10 @@ document.addEventListener('click', ev => {
     case 'settings': openSettings(); break;
     case 'cuisine':
       ui.cuisine = el.dataset.c === ui.cuisine ? 'all' : el.dataset.c;
-      renderList(false); poke($(`.chip[data-c="${ui.cuisine}"] .ico`)); break;
+      renderList(true); poke($(`#cats .cbtn[data-c="${ui.cuisine}"] .ico`)); break;
+    case 'fav': { const dk = el.dataset.dish; openRestaurant(el.dataset.key, null).then(() => openDish(dk)); break; }
+    case 'pick-photo': $('#photoIn').click(); break;
+    case 'drop-photo': ui.edit.st.photo = null; syncPhoto(); break;
     case 'add': { const r = ui.view === 'detail' ? currentRestaurant() : null; openEditor(r ? { restaurant: r.name, cuisine: r.cuisine } : {}); break; }
     case 'new-from-search': openEditor({ restaurant: ui.q.trim() }); break;
     case 'dish': openDish(el.dataset.dish); break;
@@ -925,7 +1176,7 @@ document.addEventListener('click', ev => {
     }
     case 'reset':
       if (!confirm('Wirklich alle Bewertungen auf diesem Gerät löschen? Das lässt sich nicht rückgängig machen. Tipp: vorher exportieren.')) return;
-      entries = []; persist(); closeSheet(); ui.view = 'home'; renderHome(); toast('Alles gelöscht'); break;
+      setPhotos(new Map(entries.map(e => [e.id, null]))); entries = []; persist(); closeSheet(); ui.view = 'home'; renderHome(); toast('Alles gelöscht'); break;
   }
 });
 document.addEventListener('input', ev => {
@@ -950,6 +1201,7 @@ applyTheme();
 migrateLegacyDemo();
 renderHome({ stagger: true });
 if (!user) openNameSheet();
+loadPhotos().then(migratePhotos).then(() => { if (photos.size) rerender(); });
 })();
 </script>
 </body>
