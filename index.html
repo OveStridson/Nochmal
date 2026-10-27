@@ -1,0 +1,956 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#121016">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Nochmal?">
+<title>Nochmal?</title>
+<style>
+/* =========================================================
+   NOCHMAL? – Abendmodus
+   Zero-dependency, kein Server, alles in localStorage.
+   localStorage-Präfix: nochmal_  (teilt sich die Domain mit anderen Pages-Apps!)
+   ========================================================= */
+:root{
+  --bg:#121016; --bg2:#17141c; --surface:#1e1a24; --surface2:#28232f; --line:#302a38;
+  --text:#f4efe9; --muted:#a69dad; --faint:#6f6777;
+  --accent:#6ea8ff; --accent-rgb:110,168,255; --accent-ink:#14111a; /* wird per JS aus der gewählten Farbe gesetzt */
+  --good:#4ade80; --ok:#fbbf24; --bad:#fb7185;
+  --good-bg:rgba(74,222,128,.13); --ok-bg:rgba(251,191,36,.13); --bad-bg:rgba(251,113,133,.13); --mix-bg:rgba(var(--accent-rgb),.14);
+  --radius:18px;
+  --font:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation;background:var(--bg)}
+body{margin:0;min-height:100dvh;background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.4;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+body::before{content:"";position:fixed;left:-20vw;right:-20vw;top:-20vh;height:70vh;pointer-events:none;z-index:0;
+  background:radial-gradient(55% 60% at 50% 0%,rgba(var(--accent-rgb),.17),transparent 70%),radial-gradient(35% 45% at 88% 8%,rgba(251,113,133,.08),transparent 70%)}
+body.locked{overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+input,textarea{font:inherit;font-size:16px;color:var(--text)} /* 16px = kein Auto-Zoom auf iOS */
+svg{display:block;max-width:100%}
+.app{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 112px)}
+
+/* ---------- Kopf ---------- */
+.top{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.brand h1{margin:0;font-size:25px;font-weight:800;letter-spacing:-.02em}
+.brand h1 span{color:var(--accent)}
+.iconbtn{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);color:var(--muted)}
+.iconbtn svg{width:22px;height:22px}
+
+/* ---------- Suche & Chips ---------- */
+.searchwrap{position:sticky;top:env(safe-area-inset-top,0);z-index:5;margin:0 -16px;padding:10px 16px 6px;background:linear-gradient(var(--bg) 75%,transparent)}
+.search{display:flex;align-items:center;gap:10px;height:52px;padding:0 16px;border-radius:16px;background:var(--surface);border:1px solid var(--line);color:var(--faint);transition:border-color .2s,box-shadow .2s}
+.search:focus-within{border-color:var(--accent);box-shadow:0 0 0 4px rgba(var(--accent-rgb),.15)}
+.search svg{width:20px;height:20px;flex:none}
+.search input{flex:1;min-width:0;height:100%;background:none;border:0;outline:0}
+.search input::placeholder{color:var(--faint)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:6px 16px 12px;margin:0 -16px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;display:flex;align-items:center;gap:7px;height:40px;padding:0 14px 0 7px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--muted);font-size:14px;font-weight:700;transition:background .2s,color .2s,border-color .2s}
+.chip.only{padding:0 16px}
+.chip[aria-pressed="true"]{background:var(--surface2);color:var(--text);border-color:var(--accent)}
+
+/* ---------- Icons ---------- */
+.ico{--c:var(--accent);flex:none;width:54px;height:54px;border-radius:17px;display:grid;place-items:center;
+  background:color-mix(in srgb,var(--c) 18%,var(--surface2));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 32%,transparent)}
+.ico svg{width:42px;height:42px;overflow:visible}
+.ico.big{width:88px;height:88px;border-radius:27px}.ico.big svg{width:70px;height:70px}
+.ico.sm{width:36px;height:36px;border-radius:12px}.ico.sm svg{width:29px;height:29px}
+.ico.mini{width:28px;height:28px;border-radius:9px}.ico.mini svg{width:23px;height:23px}
+.ico.mid{width:42px;height:42px;border-radius:13px}.ico.mid svg{width:34px;height:34px}
+.ico svg *{transform-box:fill-box;transform-origin:center}
+
+/* Pizza: Stück wird rausgezogen, Käse zieht Fäden */
+.p-string{opacity:0}
+.poke .p-slice{animation:pSlice .95s cubic-bezier(.3,.7,.3,1)}
+.poke .p-string{animation:pString .95s ease}
+@keyframes pSlice{0%,100%{transform:none}35%,65%{transform:translate(7px,-6px)}}
+@keyframes pString{0%,22%,78%,100%{opacity:0}32%,68%{opacity:1}}
+/* Ramen: Dampf steigt */
+.r-steam path{opacity:.35}
+.poke .r-steam path{animation:rSteam 1.1s ease-out}
+.poke .r-steam path:nth-child(2){animation-delay:.12s}
+.poke .r-steam path:nth-child(3){animation-delay:.24s}
+@keyframes rSteam{0%{opacity:.35;transform:none}35%{opacity:1}100%{opacity:0;transform:translateY(-9px)}}
+/* Burger: Schichten hüpfen */
+.poke .b-top{animation:bTop .75s cubic-bezier(.3,1.5,.5,1)}
+.poke .b-let{animation:bLet .75s cubic-bezier(.3,1.5,.5,1)}
+.poke .b-chs{animation:bChs .75s cubic-bezier(.3,1.5,.5,1)}
+.poke .b-bot{animation:bBot .75s cubic-bezier(.3,1.5,.5,1)}
+@keyframes bTop{0%,100%{transform:none}40%{transform:translateY(-8px) rotate(-4deg)}}
+@keyframes bLet{0%,100%{transform:none}40%{transform:translateY(-5px)}}
+@keyframes bChs{0%,100%{transform:none}40%{transform:translateY(-2.5px)}}
+@keyframes bBot{0%,100%{transform:none}40%{transform:translateY(3px)}}
+/* Döner: Spieß dreht sich */
+.poke .d-str{animation:dSpin .3s linear 3}
+@keyframes dSpin{to{transform:translateX(-6px)}}
+/* Curry: blubbert */
+.c-bub circle{opacity:0}
+.poke .c-bub circle{animation:cBub 1s ease-out}
+.poke .c-bub circle:nth-child(2){animation-delay:.18s}
+.poke .c-bub circle:nth-child(3){animation-delay:.36s}
+@keyframes cBub{0%{opacity:0;transform:translateY(2px) scale(.4)}30%{opacity:1;transform:translateY(-3px) scale(1)}80%{opacity:1;transform:translateY(-8px) scale(1.15)}100%{opacity:0;transform:translateY(-10px) scale(1.7)}}
+/* Sushi: Stäbchen klappern */
+.ico svg .s-stick{transform-origin:100% 100%}
+.poke .s-a{animation:sA .26s ease-in-out 3}
+.poke .s-b{animation:sB .26s ease-in-out 3}
+.poke .s-roll{animation:sHop .5s cubic-bezier(.3,1.6,.5,1) .5s}
+@keyframes sA{50%{transform:rotate(-5deg)}}
+@keyframes sB{50%{transform:rotate(4deg)}}
+@keyframes sHop{50%{transform:translateY(-3px)}}
+/* Sonstiges: Cloche hebt sich */
+.ico svg .o-lid{transform-origin:0% 100%}
+.o-spark{opacity:0}
+.poke .o-lid{animation:oLid 1s cubic-bezier(.3,.7,.3,1)}
+.poke .o-spark{animation:oSpark 1s ease}
+@keyframes oLid{0%,100%{transform:none}35%,70%{transform:translate(-2px,-10px) rotate(-12deg)}}
+@keyframes oSpark{0%,25%,80%,100%{opacity:0;transform:scale(.4)}40%,68%{opacity:1;transform:scale(1)}}
+
+/* ---------- Karten ---------- */
+.list{display:grid;gap:10px}
+@media (min-width:620px){.list{grid-template-columns:1fr 1fr}}
+.card{position:relative;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;width:100%;text-align:left;padding:14px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--line);transition:transform .15s ease,border-color .2s}
+.card:active{transform:scale(.98)}
+.cbody,.hbody{min-width:0}
+.card h3{margin:0;font-size:17px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:13px;color:var(--muted);margin-top:2px}
+.tally{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.pill{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 9px;border-radius:999px;font-size:13px;font-weight:800}
+.pill.good{background:var(--good-bg);color:var(--good)}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.pill.bad{background:var(--bad-bg);color:var(--bad)}
+.pill.mixed{background:var(--mix-bg);color:var(--accent)}
+.peek{font-size:13px;color:var(--muted);margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.peek b{font-weight:650;color:var(--text)}
+.v-good{color:var(--good);font-weight:900}.v-ok{color:var(--ok);font-weight:900}.v-bad{color:var(--bad);font-weight:900}.v-mixed{color:var(--accent);font-weight:900}
+
+.stagger>*{animation:rise .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0) * 45ms)}
+@keyframes rise{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+.fresh{animation:freshGlow 2.4s ease-out}
+.stagger>.fresh{animation:rise .5s cubic-bezier(.2,.8,.2,1) both,freshGlow 2.4s ease-out .4s}
+@keyframes freshGlow{0%,30%{box-shadow:0 0 0 2px var(--accent),0 0 30px rgba(var(--accent-rgb),.55)}100%{box-shadow:0 0 0 0 rgba(var(--accent-rgb),0)}}
+
+.demo-banner{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding:10px 10px 10px 14px;border-radius:14px;border:1px dashed rgba(var(--accent-rgb),.45);background:rgba(var(--accent-rgb),.08);font-size:13px;color:var(--muted)}
+.demo-banner span{flex:1;min-width:0}
+.demo-banner b{color:var(--text)}
+.demo-banner button{flex:none;height:34px;padding:0 12px;border-radius:10px;background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:13px}
+
+/* ---------- Leer / keine Treffer ---------- */
+.empty,.noresult{display:grid;justify-items:center;gap:8px;text-align:center;padding:36px 8px}
+.empty h2{margin:12px 0 0;font-size:23px}
+.empty p,.noresult p{margin:0;color:var(--muted);max-width:34ch}
+.empty .btns,.noresult .btns{width:100%;max-width:360px;margin-top:12px}
+
+/* ---------- Detail ---------- */
+.back{display:inline-flex;align-items:center;gap:4px;height:44px;padding:0 16px 0 10px;border-radius:14px;background:var(--surface);border:1px solid var(--line);font-weight:700;color:var(--muted)}
+.back svg{width:20px;height:20px}
+.hero{display:flex;align-items:center;gap:16px;padding:18px;border-radius:24px;background:var(--surface);border:1px solid var(--line);margin:14px 0 4px;view-transition-name:hero}
+.hero h2{margin:0;font-size:26px;line-height:1.15;overflow-wrap:anywhere}
+.sec{margin-top:22px}
+.sec h4{display:flex;align-items:center;gap:8px;margin:0 4px 10px;font-size:12.5px;letter-spacing:.09em;text-transform:uppercase}
+.sec h4 .dot{width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor}
+.sec.good h4{color:var(--good)}.sec.ok h4{color:var(--ok)}.sec.bad h4{color:var(--bad)}.sec.mixed h4{color:var(--accent)}
+.dish{position:relative;display:block;width:100%;text-align:left;padding:14px 16px;border-radius:16px;background:var(--surface);border:1px solid var(--line);overflow:hidden;margin-bottom:8px;transition:transform .15s}
+.dish:active{transform:scale(.985)}
+.dish.good{border-color:rgba(74,222,128,.22)}.dish.bad{border-color:rgba(251,113,133,.25)}
+.dish .row1{display:flex;align-items:baseline;gap:10px}
+.dish.bad .row1{padding-right:124px}
+.dish .name{flex:1;min-width:0;font-weight:750}
+.dish .price{color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}
+.votes{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px}
+.vote{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:700}
+.vote .sym{font-weight:900}
+.vote.good{background:var(--good-bg);color:var(--good)}.vote.ok{background:var(--ok-bg);color:var(--ok)}.vote.bad{background:var(--bad-bg);color:var(--bad)}
+.count{font-size:12px;color:var(--faint);margin-left:2px}
+.note{margin-top:8px;font-size:14px;color:var(--muted);font-style:italic;overflow-wrap:anywhere}
+.addhere{margin-top:18px}
+
+/* Stempel */
+.stamp{position:absolute;right:12px;top:12px;padding:3px 8px;border:2.5px solid var(--bad);border-radius:7px;color:var(--bad);font-weight:900;font-size:11px;letter-spacing:.12em;text-transform:uppercase;transform:rotate(-10deg);opacity:.78;pointer-events:none;text-shadow:0 0 8px rgba(251,113,133,.45);white-space:nowrap}
+.stamp.slam{animation:slam .55s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes slam{0%{opacity:0;transform:scale(3) rotate(-26deg)}55%{opacity:1;transform:scale(.9) rotate(-9deg)}100%{opacity:.78;transform:scale(1) rotate(-10deg)}}
+.stamp-layer{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;z-index:2}
+.stamp.big{position:static;font-size:24px;padding:6px 16px;border-width:4px;border-radius:10px;background:rgba(23,20,28,.75);animation:bigSlam 1.6s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes bigSlam{0%{opacity:0;transform:scale(3) rotate(-26deg)}22%{opacity:1;transform:scale(.9) rotate(-9deg)}32%{transform:scale(1) rotate(-10deg)}80%{opacity:1;transform:scale(1) rotate(-10deg)}100%{opacity:0;transform:scale(1.05) rotate(-10deg)}}
+.thud{animation:thud .36s ease var(--td,.3s)}
+.dish.fresh.thud{animation:thud .36s ease .3s,freshGlow 2.4s ease-out}
+@keyframes thud{0%,100%{transform:none}25%{transform:translate(-3px,1px) rotate(-.6deg)}50%{transform:translate(3px,-1px) rotate(.6deg)}75%{transform:translate(-2px,0)}}
+
+/* ---------- Sheet ---------- */
+.backdrop{position:fixed;inset:0;z-index:40;background:rgba(6,5,9,.6);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);opacity:0;transition:opacity .25s}
+.backdrop.open{opacity:1}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;max-width:680px;margin:0 auto;max-height:92dvh;overflow-y:auto;overscroll-behavior:contain;background:var(--bg2);border:1px solid var(--line);border-bottom:0;border-radius:26px 26px 0 0;padding:10px 18px calc(env(safe-area-inset-bottom) + 22px);transform:translateY(105%);transition:transform .38s cubic-bezier(.2,.9,.25,1)}
+.sheet.open{transform:none}
+.sheet.thud{--td:.12s}
+.grab{display:block;width:100%;height:22px;margin:-4px 0 6px}
+.grab::before{content:"";display:block;width:42px;height:5px;border-radius:3px;background:var(--line);margin:8px auto 0}
+.sheet h2{margin:0 0 16px;font-size:21px}
+.sh-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.sh-head h2{margin:0}
+.field{margin-bottom:16px}
+.field label,.lbl{display:block;font-size:13px;font-weight:750;color:var(--muted);margin:0 2px 7px}
+.inp{width:100%;height:50px;padding:0 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line);outline:0;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none}
+textarea.inp{height:auto;min-height:84px;padding:12px 14px;resize:vertical;line-height:1.4}
+.inp:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(var(--accent-rgb),.15)}
+.inp::placeholder{color:var(--faint)}
+.inp.err{border-color:var(--bad);animation:thud .36s ease}
+.row2{display:grid;grid-template-columns:1fr 112px;gap:10px}
+.cuisines{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:8px}
+.cbtn{--c:var(--accent);display:grid;justify-items:center;gap:6px;padding:10px 4px 8px;border-radius:16px;background:var(--surface);border:2px solid transparent;font-size:12px;font-weight:700;color:var(--muted);transition:border-color .2s,background .2s,color .2s}
+.cbtn[aria-pressed="true"]{border-color:var(--c);color:var(--text);background:color-mix(in srgb,var(--c) 12%,var(--surface))}
+.verdicts{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.vbtn{position:relative;overflow:hidden;display:grid;justify-items:center;gap:4px;padding:14px 6px;border-radius:16px;background:var(--surface);border:2px solid transparent;color:var(--muted);font-weight:750;font-size:14px;transition:transform .15s,border-color .2s,background .2s,color .2s,box-shadow .2s}
+.vbtn .sym{font-size:25px;line-height:1;font-weight:900}
+.vbtn:active{transform:scale(.95)}
+.vbtn.good[aria-pressed="true"]{border-color:var(--good);background:var(--good-bg);color:var(--good);box-shadow:0 0 24px -6px var(--good)}
+.vbtn.ok[aria-pressed="true"]{border-color:var(--ok);background:var(--ok-bg);color:var(--ok);box-shadow:0 0 24px -6px var(--ok)}
+.vbtn.bad[aria-pressed="true"]{border-color:var(--bad);background:var(--bad-bg);color:var(--bad);box-shadow:0 0 24px -6px var(--bad)}
+.vbtn.shine::after{content:"";position:absolute;inset:-20%;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%);transform:translateX(-120%);animation:shine .7s ease-out forwards}
+@keyframes shine{to{transform:translateX(120%)}}
+.vbtn.shrug{animation:shrug .6s ease}
+@keyframes shrug{0%,100%{transform:none}20%{transform:rotate(-4deg) translateY(-2px)}45%{transform:rotate(4deg) translateY(-2px)}70%{transform:rotate(-2deg)}}
+.hist{margin:6px 0 16px}
+.hitem{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start;padding:12px 0;border-bottom:1px solid var(--line)}
+.hitem:last-child{border-bottom:0}
+.hmeta{font-size:14px;color:var(--muted);padding-top:3px}
+.hmeta b{color:var(--text)}
+.hmeta .note{margin-top:4px}
+.mini-btn{height:34px;padding:0 12px;border-radius:10px;background:var(--surface);border:1px solid var(--line);font-size:13px;font-weight:700;color:var(--muted)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:54px;padding:0 16px;border-radius:16px;font-weight:800;font-size:16px;transition:transform .15s}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);box-shadow:0 10px 30px -12px var(--accent)}
+.btn.ghost{background:var(--surface);border:1px solid var(--line)}
+.btn.danger{color:var(--bad);border:1px solid rgba(251,113,133,.35)}
+.btn svg{width:20px;height:20px}
+.btns{display:grid;gap:10px}
+.hint{margin:8px 2px 0;font-size:13px;color:var(--muted)}
+.set-group{margin-bottom:20px}
+.welcome{display:grid;justify-items:center;gap:6px;text-align:center;margin:6px 0 18px}
+.welcome h2{margin:10px 0 0}
+.welcome p{margin:0;color:var(--muted);max-width:36ch}
+.toggle{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-radius:16px;background:var(--surface);border:1px solid var(--line);cursor:pointer}
+.toggle small{display:block;color:var(--muted);font-size:13px;font-weight:500}
+.toggle input{position:absolute;opacity:0;pointer-events:none}
+.sw{flex:none;position:relative;width:52px;height:32px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--text);transition:transform .25s cubic-bezier(.3,1.4,.5,1),background .2s}
+.toggle input:checked+.sw{background:var(--accent)}
+.toggle input:checked+.sw::after{transform:translateX(20px);background:var(--accent-ink)}
+.toggle input:focus-visible+.sw{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Farbwahl */
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}
+.swatch{position:relative;display:grid;justify-items:center;gap:6px;padding:10px 4px 8px;border-radius:16px;background:var(--surface);border:2px solid transparent;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;transition:border-color .2s,color .2s}
+.swatch span{width:34px;height:34px;border-radius:50%;background:var(--sw);box-shadow:0 0 16px -4px var(--sw),inset 0 0 0 2px rgba(255,255,255,.15)}
+.swatch.on{border-color:var(--accent);color:var(--text)}
+.swatch.on span{animation:pop .3s cubic-bezier(.3,1.6,.5,1)}
+.swatch.custom span{background:radial-gradient(circle,var(--sw) 50%,transparent 53%),conic-gradient(#ff6b6b,#ffd93d,#6bff95,#4fd1ff,#8b8cff,#f78fb3,#ff6b6b)}
+.swatch.custom input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0}
+html.theming *{transition:background-color .35s,border-color .35s,color .35s,box-shadow .35s!important}
+
+/* ---------- FAB, Toast, Roller ---------- */
+.fab{position:fixed;right:max(18px,calc(50vw - 322px));bottom:calc(env(safe-area-inset-bottom) + 20px);z-index:20;width:64px;height:64px;border-radius:22px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;box-shadow:0 14px 34px -10px rgba(var(--accent-rgb),.8);transition:transform .15s}
+.fab svg{width:28px;height:28px}
+.fab:active{transform:scale(.92)}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 100px);z-index:60;transform:translate(-50%,16px);opacity:0;max-width:calc(100vw - 32px);padding:12px 18px;border-radius:14px;background:var(--surface2);border:1px solid var(--line);font-weight:700;font-size:14px;text-align:center;box-shadow:0 14px 40px -12px #000;pointer-events:none;transition:opacity .25s,transform .25s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.scoot{position:fixed;left:0;bottom:calc(env(safe-area-inset-bottom) + 14px);z-index:55;pointer-events:none;display:flex;flex-direction:column;align-items:center}
+.scoot svg{width:130px;height:66px}
+.scoot.ltr{animation:driveL 2s cubic-bezier(.45,.05,.4,1) forwards}
+.scoot.rtl{animation:driveR 2s cubic-bezier(.45,.05,.4,1) forwards}
+.scoot.rtl svg{transform:scaleX(-1)}
+@keyframes driveL{from{transform:translateX(-170px)}to{transform:translateX(calc(100vw + 30px))}}
+@keyframes driveR{from{transform:translateX(calc(100vw + 30px))}to{transform:translateX(-170px)}}
+.scoot .bubble{background:var(--text);color:var(--bg);font-weight:900;font-size:13px;padding:5px 11px;border-radius:10px;white-space:nowrap;animation:pop .3s .15s both}
+@keyframes pop{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:none}}
+.scoot .wheel{transform-box:fill-box;transform-origin:center;animation:spin .35s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.scoot .rider{animation:bump .22s ease-in-out infinite alternate}
+@keyframes bump{to{transform:translateY(-1.5px)}}
+.scoot .speed{animation:speed .3s linear infinite}
+@keyframes speed{0%{opacity:.9;transform:none}100%{opacity:.2;transform:translateX(-6px)}}
+
+/* ---------- View Transitions ---------- */
+::view-transition-group(hero){animation-duration:.42s;animation-timing-function:cubic-bezier(.2,.8,.2,1)}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.26s}
+
+/* ---------- Animationen aus ---------- */
+.no-anim *,.no-anim *::before,.no-anim *::after{animation:none!important;transition:none!important}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;animation-delay:0s!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<main class="app" id="view"></main>
+<button class="fab" data-act="add" aria-label="Neuer Eintrag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+<div class="backdrop" id="backdrop" data-act="close" hidden></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" hidden></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="fileIn" accept=".txt,.json,text/plain,application/json" hidden>
+
+<script>
+(() => {
+'use strict';
+
+/* ===================== Grundlagen ===================== */
+const $ = (s, r = document) => r.querySelector(s);
+const LS = { data: 'nochmal_v1', user: 'nochmal_user', anim: 'nochmal_anim', accent: 'nochmal_accent' };
+const store = {
+  get(k, f) { try { const v = localStorage.getItem(k); return v == null ? f : JSON.parse(v); } catch (e) { return f; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+};
+const VERDICT = {
+  good: { sym: '✓', short: 'Wieder', label: 'Wieder bestellen', emoji: '🟢' },
+  ok:   { sym: '~', short: 'Okay',   label: 'Geht so',          emoji: '🟡' },
+  bad:  { sym: '✕', short: 'Nie wieder', label: 'Nie wieder',   emoji: '🔴' }
+};
+const SYM = { good: '✓', ok: '~', bad: '✕', mixed: '±' };
+const SECTIONS = [['good', 'Wieder bestellen'], ['mixed', 'Geschmackssache'], ['ok', 'Geht so'], ['bad', 'Nie wieder']];
+const CUISINES = [
+  { id: 'pizza',  label: 'Pizza',     c: '#ff7d6b' },
+  { id: 'burger', label: 'Burger',    c: '#f2a65a' },
+  { id: 'doener', label: 'Döner',     c: '#c9a27e' },
+  { id: 'asia',   label: 'Asiatisch', c: '#6fd0f0' },
+  { id: 'curry',  label: 'Indisch',   c: '#f5cf4a' },
+  { id: 'sushi',  label: 'Sushi',     c: '#f59ac5' },
+  { id: 'other',  label: 'Sonstiges', c: '#b69cff' }
+];
+const CMAP = Object.fromEntries(CUISINES.map(c => [c.id, c]));
+
+let entries = (() => { const d = store.get(LS.data, null); return d && Array.isArray(d.entries) ? d.entries : []; })();
+let user = store.get(LS.user, '');
+let animPref = store.get(LS.anim, true);
+const PRESETS = [
+  { name: 'Blau', hex: '#6ea8ff' }, { name: 'Indigo', hex: '#8b8cff' }, { name: 'Lila', hex: '#b69cff' },
+  { name: 'Türkis', hex: '#4fd1c5' }, { name: 'Rosé', hex: '#f49ac1' }
+];
+let accent = store.get(LS.accent, PRESETS[0].hex);
+const ui = { view: 'home', rKey: null, q: '', cuisine: 'all', fresh: new Set(), homeScroll: 0, edit: null, dishCtx: null, sheetLocked: false };
+
+const persist = () => { if (!store.set(LS.data, { v: 1, entries })) toast('Speichern fehlgeschlagen – Speicher voll oder gesperrt?'); };
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const norm = s => String(s ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss').replace(/\s+/g, ' ').trim();
+const slug = s => norm(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'eintrag';
+const animOn = () => animPref && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+const applyAnim = () => document.documentElement.classList.toggle('no-anim', !animPref);
+
+/* ===================== Farbschema ===================== */
+// Aus einer Akzentfarbe wird das ganze Theme abgeleitet: Hintergründe bekommen einen Hauch davon.
+const hexRgb = h => { h = h.replace('#', ''); if (h.length === 3) h = [...h].map(c => c + c).join(''); const n = parseInt(h, 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+const toHex = a => '#' + a.map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
+const mix = (a, b, t) => { const x = hexRgb(a), y = hexRgb(b); return toHex(x.map((v, i) => v * t + y[i] * (1 - t))); };
+const lum = h => { const [r, g, b] = hexRgb(h); return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255; };
+function applyTheme(smooth) {
+  if (!/^#[0-9a-f]{6}$/i.test(accent)) accent = PRESETS[0].hex;
+  let a = accent;
+  for (let i = 0; i < 6 && lum(a) < 0.38; i++) a = mix(a, '#ffffff', 0.8); // zu dunkle Farben aufhellen, sonst verschwinden Glow & Knöpfe
+  const root = document.documentElement, s = root.style, [R, G, B] = hexRgb(a);
+  if (smooth && animOn()) { root.classList.add('theming'); clearTimeout(applyTheme._t); applyTheme._t = setTimeout(() => root.classList.remove('theming'), 450); }
+  s.setProperty('--accent', a);
+  s.setProperty('--accent-rgb', `${R},${G},${B}`);
+  s.setProperty('--accent-ink', lum(a) > 0.5 ? '#14111a' : '#ffffff');
+  const bg = mix(a, '#0f0e12', 0.06);
+  s.setProperty('--bg', bg);
+  s.setProperty('--bg2', mix(a, '#141219', 0.07));
+  s.setProperty('--surface', mix(a, '#1b1920', 0.08));
+  s.setProperty('--surface2', mix(a, '#25222b', 0.10));
+  s.setProperty('--line', mix(a, '#2d2a33', 0.14));
+  const meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.setAttribute('content', bg);
+}
+function setAccent(hex) { accent = hex.toLowerCase(); store.set(LS.accent, accent); applyTheme(true); syncSwatches(); }
+function syncSwatches() {
+  const isPreset = PRESETS.some(p => p.hex === accent);
+  document.querySelectorAll('.swatch').forEach(b => {
+    const on = b.dataset.hex ? b.dataset.hex === accent : !isPreset;
+    if (on !== b.classList.contains('on')) b.classList.toggle('on', on);
+  });
+  const c = $('.swatch.custom'); if (c) c.style.setProperty('--sw', accent);
+  const inp = $('#f-color'); if (inp && inp.value !== accent) inp.value = accent;
+}
+const fmtPrice = p => p == null ? '' : p.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+const restart = (el, c) => { el.classList.remove(c); void el.offsetWidth; el.classList.add(c); };
+
+// crypto.randomUUID gibt es nur über https/localhost – Fallback für den Mac-mini-Server per http
+function uuid() {
+  try { if (crypto.randomUUID) return crypto.randomUUID(); } catch (e) {}
+  const b = crypto.getRandomValues(new Uint8Array(16));
+  b[6] = (b[6] & 15) | 64; b[8] = (b[8] & 63) | 128;
+  const h = [...b].map(x => x.toString(16).padStart(2, '0')).join('');
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+}
+function relDate(ts) {
+  const now = new Date(), day = 86400000;
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  if (ts >= today) return 'heute';
+  if (ts >= today - day) return 'gestern';
+  const diff = Math.ceil((today - ts) / day);
+  if (diff < 7) return `vor ${diff} Tagen`;
+  const d = new Date(ts);
+  return d.toLocaleDateString('de-DE', d.getFullYear() === now.getFullYear() ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+/* ===================== Icons (eigene SVGs, keine Logos) ===================== */
+let clipN = 0;
+const ICONS = {
+  pizza: () => `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <circle cx="32" cy="33" r="23" fill="#c9773f"/><circle cx="32" cy="33" r="19" fill="#ffcf6e"/>
+    <circle cx="24" cy="28" r="3" fill="#e0533f"/><circle cx="26" cy="42" r="3" fill="#e0533f"/><circle cx="38" cy="41" r="3" fill="#e0533f"/><circle cx="19" cy="36" r="1.8" fill="#7fbf5a"/><circle cx="33" cy="47" r="1.8" fill="#7fbf5a"/>
+    <path d="M32 33 L43.5 13.08 A23 23 0 0 1 54.22 27.05Z" fill="rgba(0,0,0,.4)"/>
+    <g class="p-string" stroke="#ffcf6e" stroke-width="1.6" stroke-linecap="round"><path d="M34 31 L40 26"/><path d="M37 33 L44 29"/></g>
+    <g class="p-slice"><path d="M32 33 L43.5 13.08 A23 23 0 0 1 54.22 27.05Z" fill="#c9773f"/><path d="M32 33 L41.5 16.55 A19 19 0 0 1 50.35 28.08Z" fill="#ffcf6e"/><circle cx="43" cy="24" r="2.6" fill="#e0533f"/></g>
+  </svg>`,
+  asia: () => `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <g class="r-steam" fill="none" stroke="#ece6f4" stroke-width="2.2" stroke-linecap="round"><path d="M23 24 q-3 -4 0 -8 q3 -4 0 -8"/><path d="M31 22 q-3 -4 0 -8 q3 -4 0 -8"/><path d="M39 24 q-3 -4 0 -8 q3 -4 0 -8"/></g>
+    <path d="M42 31 L55 11" stroke="#e7c9a0" stroke-width="2.4" stroke-linecap="round"/><path d="M38 31 L49 9" stroke="#e7c9a0" stroke-width="2.4" stroke-linecap="round"/>
+    <ellipse cx="32" cy="31" rx="22" ry="4.5" fill="#f2d49b"/>
+    <path d="M17 31 q3 -3 6 0 q3 3 6 0 q3 -3 6 0 q3 3 6 0 q3 -3 6 0" fill="none" stroke="#fff0c2" stroke-width="2"/>
+    <circle cx="23" cy="29.5" r="3.4" fill="#fff"/><circle cx="23" cy="29.5" r="1.6" fill="#f5a623"/>
+    <path d="M10 31 H54 A22 20 0 0 1 10 31Z" style="fill:var(--c)"/>
+    <path d="M10 31 H54" stroke="rgba(255,255,255,.4)" stroke-width="2"/>
+    <rect x="25" y="49" width="14" height="4" rx="2" style="fill:var(--c)" opacity=".75"/>
+  </svg>`,
+  burger: () => `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <g class="b-bot"><rect x="13" y="41" width="38" height="9" rx="4.5" fill="#d9924c"/></g>
+    <rect x="11" y="33" width="42" height="8" rx="4" fill="#6b3b28"/>
+    <g class="b-chs"><path d="M12 32 H52 V34 L47 38.5 L43 34 H33 L29 38.5 L25 34 H12Z" fill="#ffc83d"/></g>
+    <g class="b-let"><path d="M11 30 q3.5 3 7 0 q3.5 3 7 0 q3.5 3 7 0 q3.5 3 7 0 q3.5 3 7 0 q3.5 3 7 0 V32.5 H11Z" fill="#7cc95a"/></g>
+    <g class="b-top"><path d="M12 28.5 Q12 13 32 13 Q52 13 52 28.5Z" fill="#eaa75a"/><g fill="#fff4dc"><ellipse cx="25" cy="19" rx="1.7" ry="1"/><ellipse cx="33" cy="17" rx="1.7" ry="1"/><ellipse cx="40" cy="21" rx="1.7" ry="1"/><ellipse cx="29" cy="23.5" rx="1.7" ry="1"/></g></g>
+  </svg>`,
+  doener: () => { const id = 'dk' + (++clipN); let s = ''; for (let x = 8; x <= 62; x += 6) s += `<path d="M${x} 10 L${x - 7} 52"/>`;
+    return `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <defs><clipPath id="${id}"><path d="M21 13 H43 L38 49 H26Z"/></clipPath></defs>
+    <path d="M32 6 V58" stroke="#b9b2c2" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M21 13 H43 L38 49 H26Z" fill="#b8693a"/>
+    <g clip-path="url(#${id})"><g class="d-str" stroke="#8a4a26" stroke-width="2.2">${s}</g></g>
+    <path d="M26 17 L28.5 45" stroke="rgba(255,220,180,.35)" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="32" cy="13" rx="11" ry="2.6" fill="#d98a52"/>
+    <rect x="23" y="50" width="18" height="4" rx="2" fill="#8d8599"/>
+  </svg>`; },
+  curry: () => `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <path d="M9 33 H55 Q53 53 32 53 Q11 53 9 33Z" fill="#ece6f2"/>
+    <path d="M14 42 Q22 50 32 50" fill="none" stroke="rgba(0,0,0,.08)" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="32" cy="33" rx="23" ry="5.5" fill="#e98f2c"/>
+    <g fill="#ffd08a"><circle cx="22" cy="33.5" r="1.4"/><circle cx="40" cy="32" r="1.2"/><circle cx="31" cy="35" r="1"/></g>
+    <path d="M35 31 q4 -5 9 -3 q-3 5 -9 3Z" fill="#6fcf5b"/>
+    <g class="c-bub" fill="#ffb347"><circle cx="25" cy="31" r="2"/><circle cx="32" cy="30" r="1.6"/><circle cx="41" cy="31.5" r="1.8"/></g>
+    <path d="M9 33 H55" stroke="rgba(255,255,255,.5)" stroke-width="1.5"/>
+  </svg>`,
+  sushi: () => `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <g class="s-roll"><circle cx="22" cy="41" r="11" fill="#22302a"/><circle cx="22" cy="41" r="8" fill="#f6f3ee"/><circle cx="22" cy="41" r="3.6" fill="#ff8a65"/></g>
+    <g class="s-roll"><circle cx="42" cy="44" r="10" fill="#22302a"/><circle cx="42" cy="44" r="7.2" fill="#f6f3ee"/><circle cx="42" cy="44" r="3.2" fill="#7fd1a4"/></g>
+    <path class="s-stick s-a" d="M9 12 L56 25" stroke="#e7c9a0" stroke-width="2.6" stroke-linecap="round"/>
+    <path class="s-stick s-b" d="M9 20 L56 29" stroke="#d8b78c" stroke-width="2.6" stroke-linecap="round"/>
+  </svg>`,
+  other: () => `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <ellipse cx="32" cy="47" rx="25" ry="5" fill="#cfc8da"/>
+    <g class="o-spark" fill="#ffe08a"><path d="M25 33 l1.6 3.6 3.6 1.6 -3.6 1.6 -1.6 3.6 -1.6 -3.6 -3.6 -1.6 3.6 -1.6Z"/><path d="M39 36 l1.1 2.4 2.4 1.1 -2.4 1.1 -1.1 2.4 -1.1 -2.4 -2.4 -1.1 2.4 -1.1Z"/></g>
+    <g class="o-lid"><path d="M12 45 A20 20 0 0 1 52 45Z" style="fill:var(--c)"/><path d="M18 40 A14 14 0 0 1 27 29" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2.4" stroke-linecap="round"/><circle cx="32" cy="23" r="3.3" style="fill:var(--c)"/><rect x="10" y="44" width="44" height="3.2" rx="1.6" fill="#ece6f4"/></g>
+  </svg>`
+};
+const ico = (id, size = '', color) => { const c = CMAP[id] || CMAP.other; return `<span class="ico ${size}" style="--c:${color || c.c}" data-poke>${(ICONS[id] || ICONS.other)()}</span>`; };
+function poke(el) {
+  if (!animOn() || !el) return;
+  restart(el, 'poke');
+  clearTimeout(el._pt); el._pt = setTimeout(() => el.classList.remove('poke'), 1300);
+}
+const SVG = {
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
+  share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M7 8l5-5 5 5"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>',
+  inbox: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>'
+};
+const SCOOTER = `<svg viewBox="-24 0 144 72" aria-hidden="true">
+  <g class="speed" stroke="rgba(244,239,233,.55)" stroke-width="2.5" stroke-linecap="round"><path d="M-22 26 H2"/><path d="M-16 38 H6"/><path d="M-22 50 H-2"/></g>
+  <path d="M91 33 L118 26 V40Z" fill="rgba(255,224,138,.16)"/>
+  <g class="rider">
+    <rect x="8" y="17" width="32" height="29" rx="5" style="fill:var(--accent)"/>
+    <path d="M8 25 H40" stroke="#1a1325" stroke-width="2" opacity=".3"/>
+    <text x="24" y="40" text-anchor="middle" font-size="11" font-weight="900" style="fill:var(--accent-ink)" font-family="system-ui,sans-serif">N?</text>
+    <path d="M56 45 L70 51" stroke="#4b4258" stroke-width="5" stroke-linecap="round"/>
+    <path d="M54 41 Q58 28 66 22" stroke="#4b4258" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <path d="M65 25 L82 25" stroke="#4b4258" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="70" cy="13" r="7" fill="#f4efe9"/>
+    <path d="M63 13 A7 7 0 0 1 77 12 L78 15 H63Z" fill="#fb7185"/>
+    <rect x="44" y="40" width="20" height="6" rx="3" fill="#2b2533"/>
+  </g>
+  <path d="M24 50 H74 L84 44" stroke="#e7e2ee" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M88 56 L84 26" stroke="#e7e2ee" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M80 25 L90 23" stroke="#e7e2ee" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="88" cy="33" r="3" fill="#ffe08a"/>
+  <g class="wheel"><circle cx="28" cy="57" r="9" fill="#2b2533" stroke="#e7e2ee" stroke-width="3"/><path d="M28 50 V64 M21 57 H35" stroke="#8d8599" stroke-width="2"/></g>
+  <g class="wheel"><circle cx="88" cy="57" r="9" fill="#2b2533" stroke="#e7e2ee" stroke-width="3"/><path d="M88 50 V64 M81 57 H95" stroke="#8d8599" stroke-width="2"/></g>
+</svg>`;
+
+/* ===================== Daten ableiten ===================== */
+const live = () => entries.filter(e => !e.deleted);
+function groupDishes(es) {
+  const map = new Map();
+  for (const e of es) { const k = norm(e.dish); if (!map.has(k)) map.set(k, { key: k, entries: [] }); map.get(k).entries.push(e); }
+  return [...map.values()].map(d => {
+    d.entries.sort((a, b) => b.createdAt - a.createdAt);
+    d.name = d.entries[0].dish;
+    d.price = d.entries.find(e => e.price != null)?.price ?? null;
+    d.note = d.entries.find(e => e.note)?.note || '';
+    const by = new Map(); for (const e of d.entries) if (!by.has(e.author)) by.set(e.author, e);
+    d.byAuthor = [...by.values()];
+    const vs = new Set(d.byAuthor.map(e => e.verdict));
+    d.status = vs.size === 1 ? [...vs][0] : 'mixed';
+    d.last = d.entries[0].createdAt;
+    return d;
+  }).sort((a, b) => b.last - a.last);
+}
+function groupRestaurants() {
+  const map = new Map();
+  for (const e of live()) { const k = norm(e.restaurant); if (!map.has(k)) map.set(k, { key: k, entries: [] }); map.get(k).entries.push(e); }
+  return [...map.values()].map(r => {
+    r.entries.sort((a, b) => b.createdAt - a.createdAt);
+    r.name = r.entries[0].restaurant; r.cuisine = r.entries[0].cuisine;
+    r.last = Math.max(...r.entries.map(e => e.updatedAt));
+    r.dishes = groupDishes(r.entries);
+    r.tally = { good: 0, mixed: 0, ok: 0, bad: 0 }; r.dishes.forEach(d => r.tally[d.status]++);
+    return r;
+  }).sort((a, b) => b.last - a.last);
+}
+const currentRestaurant = () => groupRestaurants().find(r => r.key === ui.rKey);
+const pillsHTML = t => ['good', 'mixed', 'ok', 'bad'].filter(k => t[k]).map(k => `<span class="pill ${k}">${SYM[k]} ${t[k]}</span>`).join('');
+
+/* ===================== Navigation ===================== */
+function go(fn) {
+  if (document.startViewTransition && animOn()) {
+    const t = document.startViewTransition(() => { fn(); });
+    return t.finished.catch(() => {});
+  }
+  fn(); return Promise.resolve();
+}
+function openRestaurant(key, card, opts = {}) {
+  if (ui.view === 'home') { ui.homeScroll = window.scrollY; history.pushState({ nm: 'detail' }, ''); }
+  if (card && animOn()) card.style.viewTransitionName = 'hero';
+  return go(() => { ui.view = 'detail'; ui.rKey = key; renderDetail({ stagger: !opts.noStagger }); window.scrollTo(0, 0); });
+}
+function goHome() {
+  const key = ui.rKey;
+  return go(() => {
+    ui.view = 'home'; renderHome(); window.scrollTo(0, ui.homeScroll || 0);
+    const c = key && document.querySelector(`.card[data-key="${CSS.escape(key)}"]`);
+    if (c && animOn()) c.style.viewTransitionName = 'hero';
+  }).then(() => document.querySelectorAll('.card').forEach(c => { c.style.viewTransitionName = ''; }));
+}
+const rerender = () => ui.view === 'detail' ? renderDetail() : renderHome();
+
+/* ===================== Ansichten ===================== */
+const headerHTML = () => `<header class="top"><div class="brand">${ico('other', 'sm', 'var(--accent)')}<h1>Nochmal<span>?</span></h1></div><button class="iconbtn" data-act="settings" aria-label="Einstellungen">${SVG.gear}</button></header>`;
+
+function renderHome(opts = {}) {
+  const view = $('#view');
+  if (!live().length) {
+    view.innerHTML = headerHTML() + `<div class="empty">${ico('other', 'big', 'var(--accent)')}
+      <h2>Noch nichts bewertet</h2>
+      <p>Nach der nächsten Lieferung: Restaurant, Gericht, Ampel. Beim nächsten Hunger weißt du sofort, was sich lohnt – und was nie wieder.</p>
+      <div class="btns"><button class="btn primary" data-act="add">Ersten Eintrag anlegen</button><button class="btn ghost" data-act="demo">Demo-Daten ansehen</button><button class="btn ghost" data-act="import">${SVG.inbox} Datei importieren</button></div></div>`;
+    return;
+  }
+  view.innerHTML = headerHTML() + `<div class="searchwrap"><label class="search">${SVG.search}<input id="q" type="search" placeholder="Restaurant oder Gericht suchen" value="${esc(ui.q)}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Suchen"></label></div><div class="chips" id="chips"></div>${hasDemo() ? `<div class="demo-banner"><span><b>Demo-Daten aktiv</b> – werden nie geteilt oder exportiert</span><button data-act="remove-demo">Entfernen</button></div>` : ''}<div id="list"></div>`;
+  renderList(opts.stagger);
+}
+function renderList(stagger) {
+  const all = groupRestaurants();
+  const present = new Set(all.map(r => r.cuisine));
+  if (ui.cuisine !== 'all' && !present.has(ui.cuisine)) ui.cuisine = 'all';
+  const shown = CUISINES.filter(c => present.has(c.id));
+  $('#chips').innerHTML = shown.length < 2 ? '' :
+    `<button class="chip only" data-act="cuisine" data-c="all" aria-pressed="${ui.cuisine === 'all'}">Alle</button>` +
+    shown.map(c => `<button class="chip" data-act="cuisine" data-c="${c.id}" aria-pressed="${ui.cuisine === c.id}">${ico(c.id, 'mini')}${esc(c.label)}</button>`).join('');
+
+  const q = norm(ui.q); const hits = new Map();
+  let list = all.filter(r => ui.cuisine === 'all' || r.cuisine === ui.cuisine);
+  if (q) list = list.filter(r => {
+    const dh = r.dishes.filter(d => norm(d.name).includes(q));
+    if (dh.length) hits.set(r.key, dh);
+    return norm(r.name).includes(q) || dh.length;
+  });
+  const el = $('#list');
+  if (!list.length) {
+    el.className = '';
+    el.innerHTML = q
+      ? `<div class="noresult"><p>Nichts gefunden für „${esc(ui.q)}“.</p><div class="btns"><button class="btn ghost" data-act="new-from-search">+ „${esc(ui.q)}“ neu anlegen</button></div></div>`
+      : `<div class="noresult"><p>Keine Einträge in dieser Küche.</p></div>`;
+    return;
+  }
+  el.className = 'list' + (stagger ? ' stagger' : '');
+  el.innerHTML = list.map((r, i) => cardHTML(r, i, hits.get(r.key))).join('');
+}
+function cardHTML(r, i, hit) {
+  const c = CMAP[r.cuisine] || CMAP.other;
+  let peek;
+  if (hit) peek = hit.slice(0, 2).map(d => `<span class="v-${d.status}">${SYM[d.status]}</span> <b>${esc(d.name)}</b>`).join(' · ');
+  else {
+    const g = r.dishes.find(d => d.status === 'good'), b = r.dishes.find(d => d.status === 'bad');
+    peek = [g && `<span class="v-good">✓</span> <b>${esc(g.name)}</b>`, b && `<span class="v-bad">✕</span> ${esc(b.name)}`].filter(Boolean).join(' · ')
+      || `${r.dishes.length} Gericht${r.dishes.length === 1 ? '' : 'e'}`;
+  }
+  const fresh = r.entries.some(e => ui.fresh.has(e.id));
+  return `<button class="card${fresh ? ' fresh' : ''}" data-act="open" data-key="${esc(r.key)}" style="--i:${Math.min(i, 12)}">
+    ${ico(r.cuisine)}<div class="cbody"><h3>${esc(r.name)}</h3><div class="sub">${esc(c.label)} · ${relDate(r.last)}</div><div class="tally">${pillsHTML(r.tally)}</div><div class="peek">${peek}</div></div></button>`;
+}
+function renderDetail(opts = {}) {
+  const r = currentRestaurant();
+  if (!r) { ui.view = 'home'; renderHome(); return; }
+  const c = CMAP[r.cuisine] || CMAP.other; let i = 0;
+  let html = `<button class="back" data-act="back">${SVG.back}Übersicht</button>
+    <section class="hero">${ico(r.cuisine, 'big')}<div class="hbody"><h2>${esc(r.name)}</h2><div class="sub">${esc(c.label)} · ${r.entries.length} Bewertung${r.entries.length === 1 ? '' : 'en'} · ${relDate(r.last)}</div><div class="tally">${pillsHTML(r.tally)}</div></div></section>`;
+  for (const [k, label] of SECTIONS) {
+    const ds = r.dishes.filter(d => d.status === k);
+    if (!ds.length) continue;
+    html += `<section class="sec ${k}"><h4><span class="dot"></span>${label}</h4><div class="${opts.stagger ? 'stagger' : ''}">${ds.map(d => dishHTML(d, i++)).join('')}</div></section>`;
+  }
+  html += `<button class="btn ghost addhere" data-act="add">+ Weiteres Gericht bei ${esc(r.name)}</button>`;
+  $('#view').innerHTML = html;
+}
+function dishHTML(d, i) {
+  const fresh = d.entries.some(e => ui.fresh.has(e.id));
+  return `<button class="dish ${d.status}${fresh ? ' fresh' : ''}" data-act="dish" data-dish="${esc(d.key)}" style="--i:${Math.min(i, 12)}">
+    <div class="row1"><span class="name">${esc(d.name)}</span>${d.price != null ? `<span class="price">${fmtPrice(d.price)}</span>` : ''}</div>
+    <div class="votes">${d.byAuthor.map(e => `<span class="vote ${e.verdict}"><span class="sym">${VERDICT[e.verdict].sym}</span>${esc(e.author)}</span>`).join('')}${d.entries.length > 1 ? `<span class="count">${d.entries.length}× bewertet</span>` : ''}</div>
+    ${d.note ? `<div class="note">„${esc(d.note)}“</div>` : ''}
+    ${d.status === 'bad' ? '<span class="stamp">Nie wieder</span>' : ''}</button>`;
+}
+
+/* ===================== Sheets ===================== */
+function openSheet(html, onMount) {
+  const sh = $('#sheet'), bd = $('#backdrop'), wasOpen = sh.classList.contains('open');
+  sh.innerHTML = html; sh.scrollTop = 0;
+  if (!wasOpen) {
+    sh.hidden = false; bd.hidden = false; void sh.offsetHeight;
+    sh.classList.add('open'); bd.classList.add('open'); document.body.classList.add('locked');
+  }
+  if (onMount) onMount(sh);
+}
+function closeSheet() {
+  if (ui.sheetLocked) return;
+  const sh = $('#sheet'), bd = $('#backdrop');
+  sh.classList.remove('open', 'thud'); bd.classList.remove('open'); document.body.classList.remove('locked');
+  if (document.activeElement && sh.contains(document.activeElement)) document.activeElement.blur();
+  setTimeout(() => { if (!sh.classList.contains('open')) { sh.hidden = true; bd.hidden = true; sh.innerHTML = ''; } }, animOn() ? 400 : 0);
+}
+function openNameSheet() {
+  ui.sheetLocked = true;
+  openSheet(`<div class="welcome">${ico('other', 'big', 'var(--accent)')}<h2>Willkommen bei Nochmal?</h2><p>Hier landet nach jeder Lieferung dein Urteil. Damit geteilte Bewertungen zuzuordnen sind:</p></div>
+    <div class="field"><label for="f-name">Wie heißt du?</label><input class="inp" id="f-name" placeholder="Dein Vorname" maxlength="24" autocomplete="given-name" enterkeyhint="done"></div>
+    <div class="btns"><button class="btn primary" data-act="save-name">Los geht’s</button></div>`);
+}
+function openSettings() {
+  openSheet(`<button class="grab" data-act="close" aria-label="Schließen"></button><h2>Einstellungen</h2>
+    <div class="field"><label for="f-name">Dein Name</label><input class="inp" id="f-name" value="${esc(user)}" maxlength="24"><p class="hint">Steht an jeder deiner Bewertungen. Ältere Einträge behalten den alten Namen.</p></div>
+    <div class="set-group"><span class="lbl">Farbe</span><div class="swatches">
+      ${PRESETS.map(p => `<button class="swatch${p.hex === accent ? ' on' : ''}" data-act="accent" data-hex="${p.hex}" style="--sw:${p.hex}"><span></span>${p.name}</button>`).join('')}
+      <label class="swatch custom${PRESETS.some(p => p.hex === accent) ? '' : ' on'}" style="--sw:${accent}"><input type="color" id="f-color" value="${accent}" aria-label="Eigene Farbe wählen"><span></span>Eigene</label>
+    </div><p class="hint">Grün, Gelb und Rot sind für die Ampel reserviert. Eine Akzentfarbe in diesen Tönen macht das Urteil schwerer lesbar.</p></div>
+    <div class="set-group"><span class="lbl">Teilen & Sichern</span><div class="btns"><button class="btn ghost" data-act="export-all">${SVG.share} Alles exportieren</button><button class="btn ghost" data-act="import">${SVG.inbox} Datei importieren</button></div><p class="hint">Die Datei kannst du per Telegram schicken. Beim Import wird zusammengeführt – nichts landet doppelt, die neuere Version gewinnt.</p></div>
+    <div class="set-group"><label class="toggle"><span><b>Animationen</b><small>Stempel, Roller & Co.</small></span><input type="checkbox" id="f-anim" ${animPref ? 'checked' : ''}><span class="sw"></span></label></div>
+    <div class="set-group"><span class="lbl">Daten</span><div class="btns">${hasDemo() ? '<button class="btn ghost" data-act="remove-demo">Demo-Daten entfernen</button>' : live().length ? '' : '<button class="btn ghost" data-act="demo">Demo-Daten laden</button>'}<button class="btn danger" data-act="reset">Alle Daten auf diesem Gerät löschen</button></div><p class="hint">Alles bleibt nur auf diesem Gerät. Exportiere ab und zu als Backup.</p></div>
+    <div class="btns"><button class="btn primary" data-act="save-settings">Fertig</button></div>`);
+}
+function openDish(dKey) {
+  const r = currentRestaurant(); if (!r) return;
+  const d = r.dishes.find(x => x.key === dKey); if (!d) return;
+  ui.dishCtx = { rName: r.name, cuisine: r.cuisine, name: d.name, entries: d.entries };
+  openSheet(`<button class="grab" data-act="close" aria-label="Schließen"></button>
+    <div class="sh-head">${ico(r.cuisine, 'mid')}<div><h2>${esc(d.name)}</h2><div class="sub">${esc(r.name)}${d.price != null ? ' · ' + fmtPrice(d.price) : ''}</div></div></div>
+    <div class="hist">${d.entries.map(e => `<div class="hitem"><span class="vote ${e.verdict}"><span class="sym">${VERDICT[e.verdict].sym}</span>${VERDICT[e.verdict].short}</span>
+      <div class="hmeta"><b>${esc(e.author)}</b> · ${relDate(e.createdAt)}${e.price != null ? ' · ' + fmtPrice(e.price) : ''}${e.note ? `<div class="note">„${esc(e.note)}“</div>` : ''}</div>
+      ${e.author === user ? `<button class="mini-btn" data-act="edit" data-id="${esc(e.id)}">Ändern</button>` : '<span></span>'}</div>`).join('')}</div>
+    <div class="btns"><button class="btn primary" data-act="rate-again">Neu bewerten</button><button class="btn ghost" data-act="share-dish">${SVG.share} Teilen</button></div>`);
+}
+function openEditor({ id = null, restaurant = '', cuisine = null, dish = '' } = {}) {
+  const e = id ? entries.find(x => x.id === id) : null;
+  const rs = groupRestaurants();
+  const rName = e ? e.restaurant : restaurant;
+  const match = rs.find(r => r.key === norm(rName));
+  ui.edit = { id, st: { verdict: e ? e.verdict : null, cuisine: e ? e.cuisine : (cuisine || match?.cuisine || 'other') } };
+  const st = ui.edit.st;
+  openSheet(`<button class="grab" data-act="close" aria-label="Schließen"></button><h2>${e ? 'Eintrag ändern' : 'Wie war’s?'}</h2>
+    <div class="field"><label for="f-r">Restaurant</label><input class="inp" id="f-r" list="dl-r" value="${esc(rName)}" placeholder="z. B. Sultan Kebab" autocomplete="off" autocapitalize="words" enterkeyhint="next"><datalist id="dl-r">${rs.map(r => `<option value="${esc(r.name)}">`).join('')}</datalist></div>
+    <div class="field"><span class="lbl">Küche</span><div class="cuisines">${CUISINES.map(c => `<button type="button" class="cbtn" data-act="pick-cuisine" data-c="${c.id}" style="--c:${c.c}" aria-pressed="${st.cuisine === c.id}">${ico(c.id, 'mid')}${esc(c.label)}</button>`).join('')}</div></div>
+    <div class="field row2"><div><label for="f-d">Gericht</label><input class="inp" id="f-d" list="dl-d" value="${esc(e ? e.dish : dish)}" placeholder="z. B. Lamm-Dürüm" autocomplete="off" enterkeyhint="next"><datalist id="dl-d"></datalist></div>
+      <div><label for="f-p">Preis</label><input class="inp" id="f-p" inputmode="decimal" placeholder="9,50" value="${e && e.price != null ? String(e.price).replace('.', ',') : ''}" enterkeyhint="next"></div></div>
+    <div class="field"><span class="lbl">Urteil</span><div class="verdicts" id="verdicts">${['good', 'ok', 'bad'].map(v => `<button type="button" class="vbtn ${v}" data-act="verdict" data-v="${v}" aria-pressed="${st.verdict === v}"><span class="sym">${VERDICT[v].sym}</span>${VERDICT[v].short}</button>`).join('')}</div></div>
+    <div class="field"><label for="f-n">Notiz <span style="font-weight:500">(optional)</span></label><textarea class="inp" id="f-n" rows="3" placeholder="Was war gut, was nicht? Kam es warm an?">${esc(e ? e.note : '')}</textarea></div>
+    <div class="btns"><button class="btn primary" data-act="save">Speichern</button>${e ? '<button class="btn danger" data-act="delete">Löschen</button>' : ''}</div>`,
+    () => fillDishList(match));
+}
+function fillDishList(r) { const dl = $('#dl-d'); if (dl) dl.innerHTML = r ? r.dishes.map(d => `<option value="${esc(d.name)}">`).join('') : ''; }
+function syncCuisineBtns(doPoke) {
+  document.querySelectorAll('.cbtn').forEach(b => b.setAttribute('aria-pressed', b.dataset.c === ui.edit.st.cuisine));
+  if (doPoke) poke($(`.cbtn[data-c="${ui.edit.st.cuisine}"] .ico`));
+}
+function onRestaurantInput() {
+  const r = groupRestaurants().find(x => x.key === norm($('#f-r').value));
+  if (r && ui.edit.st.cuisine !== r.cuisine) { ui.edit.st.cuisine = r.cuisine; syncCuisineBtns(true); }
+  fillDishList(r);
+}
+function setVerdict(btn) {
+  const v = btn.dataset.v; ui.edit.st.verdict = v;
+  document.querySelectorAll('.vbtn').forEach(b => b.setAttribute('aria-pressed', b === btn));
+  if (!animOn()) return;
+  if (v === 'good') restart(btn, 'shine');
+  else if (v === 'ok') restart(btn, 'shrug');
+  else {
+    const wrap = $('#verdicts'); wrap.querySelector('.stamp-layer')?.remove();
+    const l = document.createElement('div'); l.className = 'stamp-layer'; l.innerHTML = '<span class="stamp big">Nie wieder</span>';
+    wrap.appendChild(l); restart($('#sheet'), 'thud');
+    setTimeout(() => l.remove(), 1700);
+  }
+}
+function fieldErr(sel, msg) { const i = $(sel); restart(i, 'err'); i.focus(); toast(msg); }
+
+/* ===================== Speichern / Löschen ===================== */
+function saveEntry() {
+  const st = ui.edit.st, isEdit = !!ui.edit.id;
+  const restaurant = $('#f-r').value.trim().replace(/\s+/g, ' ');
+  const dish = $('#f-d').value.trim().replace(/\s+/g, ' ');
+  const pr = $('#f-p').value.trim().replace(/[\s€]/g, '').replace(',', '.');
+  const price = pr === '' ? null : (isFinite(+pr) && +pr >= 0 ? Math.round(+pr * 100) / 100 : NaN);
+  const note = $('#f-n').value.trim();
+  if (!restaurant) return fieldErr('#f-r', 'Welches Restaurant?');
+  if (!dish) return fieldErr('#f-d', 'Welches Gericht?');
+  if (Number.isNaN(price)) return fieldErr('#f-p', 'Preis bitte als Zahl, z. B. 9,50');
+  if (!st.verdict) { restart($('#verdicts'), 'thud'); return toast('Wie war’s? Tipp auf die Ampel.'); }
+  const existing = groupRestaurants().find(r => r.key === norm(restaurant));
+  const rName = existing ? existing.name : restaurant; // gleiche Schreibweise beibehalten
+  const now = Date.now(); let id;
+  if (isEdit) {
+    const e = entries.find(x => x.id === ui.edit.id);
+    Object.assign(e, { restaurant: rName, cuisine: st.cuisine, dish, price, verdict: st.verdict, note, updatedAt: now }); id = e.id;
+  } else {
+    id = uuid();
+    entries.push({ id, restaurant: rName, cuisine: st.cuisine, dish, price, verdict: st.verdict, note, author: user, createdAt: now, updatedAt: now, deleted: false });
+  }
+  persist(); closeSheet();
+  ui.fresh = new Set([id]); setTimeout(() => ui.fresh.clear(), 4000);
+  const verdict = st.verdict, rKey = norm(rName), dKey = norm(dish);
+  const after = () => {
+    const row = document.querySelector(`.dish[data-dish="${CSS.escape(dKey)}"]`);
+    if (row) {
+      row.scrollIntoView({ block: 'center', behavior: animOn() ? 'smooth' : 'auto' });
+      if (verdict === 'bad' && animOn()) { const s = row.querySelector('.stamp'); if (s) restart(s, 'slam'); restart(row, 'thud'); }
+    }
+    if (!isEdit) scooter('ltr', 'Geliefert!');
+    toast(isEdit ? 'Änderung gespeichert' : 'Gespeichert');
+  };
+  if (ui.view === 'detail' && ui.rKey === rKey) { renderDetail(); setTimeout(after, 60); }
+  else openRestaurant(rKey, null, { noStagger: true }).then(after);
+}
+function deleteEntry() {
+  const e = entries.find(x => x.id === ui.edit.id); if (!e) return;
+  if (!confirm('Diesen Eintrag löschen?')) return;
+  e.deleted = true; e.updatedAt = Date.now(); // Lösch-Markierung, damit der Import ihn nicht zurückholt
+  persist(); closeSheet(); rerender(); toast('Gelöscht');
+}
+
+/* ===================== Teilen / Import ===================== */
+function payload(list, header) {
+  const json = JSON.stringify({ app: 'nochmal', v: 1, from: user, exportedAt: Date.now(), entries: list });
+  return `${header}\n\nIn „Nochmal?“ öffnen: Einstellungen → Datei importieren.\n---\n${json}`;
+}
+async function shareFile(name, text, title) {
+  const file = new File([text], name, { type: 'text/plain' });
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title }); return 'shared'; }
+  } catch (e) { if (e && e.name === 'AbortError') return 'aborted'; }
+  const url = URL.createObjectURL(file), a = document.createElement('a');
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  return 'downloaded';
+}
+const shareFeedback = r => { if (r === 'downloaded') toast('Datei gespeichert – jetzt in Telegram anhängen'); else if (r === 'shared') toast('Geteilt'); };
+async function shareDish() {
+  const c = ui.dishCtx; if (!c) return;
+  const seen = new Set(), lines = [];
+  for (const e of c.entries) if (!e.demo && !seen.has(e.author)) { seen.add(e.author); lines.push(`${VERDICT[e.verdict].emoji} ${e.restaurant} – ${e.dish} (${e.author}${e.note ? ': „' + e.note + '“' : ''})`); }
+  const real = c.entries.filter(e => !e.demo);
+  if (!real.length) { toast('Demo-Einträge lassen sich nicht teilen'); return; }
+  shareFeedback(await shareFile(`nochmal-${slug(c.rName)}-${slug(c.name)}.txt`, payload(real,`Nochmal? – Tipp von ${user}\n${lines.join('\n')}`), `${c.rName} – ${c.name}`));
+}
+async function exportAll() {
+  const d = new Date(), stamp = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const real = entries.filter(e => !e.demo);
+  if (!real.length) { toast('Noch keine eigenen Bewertungen zum Exportieren'); return; }
+  shareFeedback(await shareFile(`nochmal-alles-${stamp}.txt`, payload(real, `Nochmal? – Sammlung von ${user}\n📦 ${real.filter(e => !e.deleted).length} Bewertungen, Stand ${d.toLocaleDateString('de-DE')}`), 'Nochmal? – Sammlung'));
+}
+function parsePayload(text) {
+  const m = text.indexOf('\n---\n');
+  const json = m >= 0 ? text.slice(m + 5) : text.slice(text.indexOf('{'));
+  const d = JSON.parse(json);
+  if (!d || d.app !== 'nochmal' || !Array.isArray(d.entries)) throw new Error('format');
+  return d;
+}
+function clean(x) {
+  if (!x || x.demo || typeof x.id !== 'string' || !x.id || !VERDICT[x.verdict]) return null;
+  const s = (t, n) => String(t ?? '').trim().slice(0, n);
+  const restaurant = s(x.restaurant, 80), dish = s(x.dish, 100);
+  if (!restaurant || !dish) return null;
+  const num = t => Number.isFinite(+t) && +t > 0 ? +t : Date.now();
+  return { id: x.id.slice(0, 64), restaurant, cuisine: CMAP[x.cuisine] ? x.cuisine : 'other', dish,
+    price: typeof x.price === 'number' && isFinite(x.price) ? Math.round(x.price * 100) / 100 : null,
+    verdict: x.verdict, note: s(x.note, 500), author: s(x.author, 24) || 'Unbekannt',
+    createdAt: num(x.createdAt), updatedAt: num(x.updatedAt), deleted: !!x.deleted };
+}
+function merge(list) {
+  const byId = new Map(entries.map(e => [e.id, e])); let added = 0, updated = 0; const fresh = new Set();
+  for (const raw of list) {
+    const x = clean(raw); if (!x) continue;
+    const ex = byId.get(x.id);
+    if (!ex) { entries.push(x); byId.set(x.id, x); if (!x.deleted) { added++; fresh.add(x.id); } }
+    else if (x.updatedAt > ex.updatedAt) { Object.assign(ex, x); updated++; if (!x.deleted) fresh.add(x.id); }
+  }
+  if (added || updated) persist();
+  return { added, updated, fresh };
+}
+$('#fileIn').addEventListener('change', async ev => {
+  const f = ev.target.files[0]; ev.target.value = ''; if (!f) return;
+  let data;
+  try { data = parsePayload(await f.text()); } catch (e) { toast('Das ist keine gültige Nochmal?-Datei'); return; }
+  const res = merge(data.entries);
+  ui.sheetLocked = false; closeSheet();
+  if (!res.added && !res.updated) { toast('Alles schon bekannt – nichts Neues dabei'); return; }
+  ui.fresh = res.fresh; setTimeout(() => ui.fresh.clear(), 4000);
+  ui.q = ''; ui.cuisine = 'all';
+  if (ui.view === 'detail') history.back(); // zurück zur Übersicht
+  ui.view = 'home'; renderHome({ stagger: true }); window.scrollTo(0, 0);
+  const from = data.from && data.from !== user ? data.from : null;
+  scooter('rtl', from ? `Post von ${from}!` : 'Backup da!');
+  toast([res.added && `${res.added} neu`, res.updated && `${res.updated} aktualisiert`].filter(Boolean).join(' · '));
+});
+
+/* ===================== Demo ===================== */
+// Demo-Einträge tragen demo:true – sie werden nie exportiert/geteilt und lassen sich gezielt entfernen.
+const me = '__me__', g = '__gast__';
+const DEMO_ROWS = [
+    ['Sultan Kebab', 'doener', 'Lamm-Dürüm', 9.5, 'good', me, 'Bestes Fladenbrot im Viertel', 2],
+    ['Sultan Kebab', 'doener', 'Falafel-Teller', 11, 'bad', me, 'Trocken und lauwarm angekommen', 9],
+    ['Sultan Kebab', 'doener', 'Adana-Teller', 14.9, 'good', me, '', 5],
+    ['Sultan Kebab', 'doener', 'Adana-Teller', 14.9, 'ok', g, 'Mir zu fettig', 5],
+    ['Pizzeria Da Gino', 'pizza', 'Diavola', 12.5, 'good', me, 'Richtig scharf, dünner Boden', 3],
+    ['Pizzeria Da Gino', 'pizza', 'Calzone', 13, 'ok', g, '', 3],
+    ['Pizzeria Da Gino', 'pizza', 'Hawaii', 11.5, 'good', me, '', 12],
+    ['Pizzeria Da Gino', 'pizza', 'Hawaii', 11.5, 'bad', g, 'Ananas gehört nicht auf Pizza', 12],
+    ['Bombay Palace', 'curry', 'Butter Chicken', 15.9, 'good', me, 'Unbedingt mit Knoblauch-Naan', 6],
+    ['Bombay Palace', 'curry', 'Butter Chicken', 15.9, 'good', g, '', 6],
+    ['Bombay Palace', 'curry', 'Lamm Vindaloo', 17.5, 'bad', me, 'Selbst für mich viel zu scharf', 20],
+    ['Ramen Ya', 'asia', 'Tonkotsu Ramen', 14.5, 'good', g, 'Brühe kommt separat, bleibt heiß', 1],
+    ['Ramen Ya', 'asia', 'Gyoza (6 Stück)', 6.5, 'ok', me, '', 1],
+    ['Burger Bros', 'burger', 'Smash Burger', 12.9, 'good', me, '', 15],
+    ['Burger Bros', 'burger', 'Süßkartoffel-Pommes', 4.9, 'bad', me, 'Kamen komplett pappig an', 15],
+    ['Sushi Circle', 'sushi', 'Lachs-Avocado-Maki', 8.9, 'good', g, '', 8],
+    ['Sushi Circle', 'sushi', 'Crunchy Roll', 11.9, 'ok', me, 'Zu viel Mayo', 8]
+];
+function demo() {
+  const D = 86400000, n = Date.now();
+  DEMO_ROWS.forEach(([restaurant, cuisine, dish, price, verdict, who, note, days], i) => {
+    const t = n - days * D - i * 60000;
+    entries.push({ id: uuid(), restaurant, cuisine, dish, price, verdict, note, author: who === me ? (user || 'Ich') : 'Gast', createdAt: t, updatedAt: t, deleted: false, demo: true });
+  });
+  persist();
+}
+const hasDemo = () => entries.some(e => e.demo);
+function removeDemo() { entries = entries.filter(e => !e.demo); persist(); }
+// Demo-Daten aus der allerersten Version hatten noch keine Markierung → an Restaurant+Gericht+Preis+Notiz erkennen
+function migrateLegacyDemo() {
+  const sig = new Set(DEMO_ROWS.map(r => `${r[0]}|${r[2]}|${r[3]}|${r[6]}`));
+  let changed = false;
+  for (const e of entries) if (!e.demo && sig.has(`${e.restaurant}|${e.dish}|${e.price}|${e.note}`)) { e.demo = true; changed = true; }
+  if (changed) persist();
+}
+
+/* ===================== Kleinkram ===================== */
+let toastT;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2400); }
+function scooter(dir, text) {
+  if (!animOn()) return;
+  const el = document.createElement('div');
+  el.className = 'scoot ' + dir; el.setAttribute('aria-hidden', 'true');
+  el.innerHTML = `<div class="bubble">${esc(text)}</div>${SCOOTER}`;
+  document.body.appendChild(el);
+  el.addEventListener('animationend', ev => { if (ev.target === el) el.remove(); });
+  setTimeout(() => el.remove(), 3000);
+}
+
+/* ===================== Events ===================== */
+document.addEventListener('click', ev => {
+  const pk = ev.target.closest('[data-poke]');
+  const el = ev.target.closest('[data-act]');
+  if (pk && (!el || !el.contains(pk))) poke(pk);
+  if (!el) return;
+  switch (el.dataset.act) {
+    case 'open': openRestaurant(el.dataset.key, el); break;
+    case 'back': if (history.state && history.state.nm === 'detail') history.back(); else goHome(); break;
+    case 'settings': openSettings(); break;
+    case 'cuisine':
+      ui.cuisine = el.dataset.c === ui.cuisine ? 'all' : el.dataset.c;
+      renderList(false); poke($(`.chip[data-c="${ui.cuisine}"] .ico`)); break;
+    case 'add': { const r = ui.view === 'detail' ? currentRestaurant() : null; openEditor(r ? { restaurant: r.name, cuisine: r.cuisine } : {}); break; }
+    case 'new-from-search': openEditor({ restaurant: ui.q.trim() }); break;
+    case 'dish': openDish(el.dataset.dish); break;
+    case 'edit': openEditor({ id: el.dataset.id }); break;
+    case 'rate-again': { const d = ui.dishCtx; openEditor({ restaurant: d.rName, cuisine: d.cuisine, dish: d.name }); break; }
+    case 'share-dish': shareDish(); break;
+    case 'verdict': setVerdict(el); break;
+    case 'pick-cuisine': ui.edit.st.cuisine = el.dataset.c; syncCuisineBtns(true); break;
+    case 'save': saveEntry(); break;
+    case 'delete': deleteEntry(); break;
+    case 'close': closeSheet(); break;
+    case 'save-name': {
+      const v = $('#f-name').value.trim(); if (!v) return fieldErr('#f-name', 'Wie heißt du?');
+      user = v; store.set(LS.user, v); ui.sheetLocked = false; closeSheet(); toast(`Hallo ${v}!`); break;
+    }
+    case 'save-settings': {
+      const v = $('#f-name').value.trim(); if (!v) return fieldErr('#f-name', 'Name darf nicht leer sein');
+      user = v; store.set(LS.user, v); closeSheet(); rerender(); break;
+    }
+    case 'accent': setAccent(el.dataset.hex); break;
+    case 'export-all': exportAll(); break;
+    case 'import': $('#fileIn').click(); break;
+    case 'demo': demo(); closeSheet(); ui.view = 'home'; renderHome({ stagger: true }); toast('Demo-Daten geladen'); break;
+    case 'remove-demo': {
+      const own = entries.some(e => !e.demo && !e.deleted);
+      removeDemo(); closeSheet();
+      if (ui.view === 'detail') { if (history.state && history.state.nm === 'detail') history.back(); ui.view = 'home'; }
+      renderHome({ stagger: own }); window.scrollTo(0, 0); toast('Demo-Daten entfernt');
+      break;
+    }
+    case 'reset':
+      if (!confirm('Wirklich alle Bewertungen auf diesem Gerät löschen? Das lässt sich nicht rückgängig machen. Tipp: vorher exportieren.')) return;
+      entries = []; persist(); closeSheet(); ui.view = 'home'; renderHome(); toast('Alles gelöscht'); break;
+  }
+});
+document.addEventListener('input', ev => {
+  const t = ev.target;
+  if (t.classList.contains('err')) t.classList.remove('err');
+  if (t.id === 'q') { ui.q = t.value; renderList(false); }
+  else if (t.id === 'f-r') onRestaurantInput();
+  else if (t.id === 'f-color') setAccent(t.value); // Live-Vorschau beim Ziehen im Farbwähler
+});
+document.addEventListener('change', ev => {
+  if (ev.target.id === 'f-anim') { animPref = ev.target.checked; store.set(LS.anim, animPref); applyAnim(); }
+});
+document.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter' && ev.target.id === 'q') ev.target.blur();
+  if (ev.key === 'Escape') closeSheet();
+});
+window.addEventListener('popstate', () => { if (ui.view === 'detail') goHome(); });
+
+/* ===================== Start ===================== */
+applyAnim();
+applyTheme();
+migrateLegacyDemo();
+renderHome({ stagger: true });
+if (!user) openNameSheet();
+})();
+</script>
+</body>
+</html>
