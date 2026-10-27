@@ -68,6 +68,80 @@ svg{display:block;max-width:100%}
 .fbadge{position:absolute;left:8px;top:8px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--good);color:#0d1f14;font-size:13px;font-weight:900;box-shadow:0 2px 8px rgba(0,0,0,.4)}
 .fav b{display:block;padding:9px 10px 0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fav small{display:block;padding:1px 10px 10px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fbadge.ok{background:var(--ok);color:#2a1d02}.fbadge.bad{background:var(--bad);color:#2a0910}
+
+/* ---------- Dashboard ---------- */
+.dash{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin:2px 0 6px}
+.dash[hidden]{display:none}
+.dash .favs{margin-bottom:0}
+.dash .shelf{margin-top:0}
+.hello{display:flex;align-items:center;gap:6px}
+.hello>div{flex:1;min-width:0}
+.hello h2{margin:0;font-size:25px;line-height:1.15;letter-spacing:-.01em;overflow-wrap:anywhere}
+.hello p{margin:5px 0 0;color:var(--muted);font-size:15px}
+.scene{flex:none;width:132px;margin-right:-8px}
+.scene svg{width:100%;height:auto;overflow:visible}
+.scene .speed,.art .speed,.scene .beam,.art .beam{display:none}
+.steam path{opacity:.4;transform-box:fill-box;transform-origin:center bottom;animation:steamUp 2.8s ease-in-out infinite}
+.steam path:nth-child(2){animation-delay:.9s}
+.steam path:nth-child(3){animation-delay:1.8s}
+@keyframes steamUp{0%{opacity:0;transform:translateY(5px) scaleY(.7)}35%{opacity:.7}100%{opacity:0;transform:translateY(-8px) scaleY(1.1)}}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{padding:12px 6px 10px;border-radius:16px;background:var(--surface);border:1px solid var(--line);text-align:center}
+.stat b{display:block;font-size:27px;font-weight:850;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{display:block;margin-top:2px;font-size:12.5px;font-weight:700;color:var(--muted)}
+.stat.bad{border-color:rgba(251,113,133,.28)}
+.stat.bad b,.stat.bad span{color:var(--bad)}
+.roll-btn{min-height:64px;font-size:18px}
+.roll-btn svg{width:26px;height:26px}
+.roll-hint{margin:0;padding:14px 16px;border-radius:16px;border:1px dashed var(--line);color:var(--muted);font-size:14px;text-align:center}
+.slot{display:flex;align-items:center;justify-content:center;gap:10px;min-height:88px;border-radius:18px;background:var(--surface);border:1px solid var(--line)}
+.reel{width:64px;height:64px;overflow:hidden;border-radius:16px;background:var(--surface2);box-shadow:inset 0 10px 10px -8px rgba(0,0,0,.6),inset 0 -10px 10px -8px rgba(0,0,0,.6)}
+.reel-strip{animation:reel var(--d,1.2s) cubic-bezier(.2,.7,.25,1) forwards}
+.reel-strip>span{height:64px;display:grid;place-items:center}
+@keyframes reel{to{transform:translateY(var(--end))}}
+.pick-row{display:grid;grid-template-columns:1fr 84px;gap:8px}
+.pick-row.land{animation:land .45s cubic-bezier(.3,1.5,.5,1)}
+@keyframes land{from{opacity:0;transform:translateY(-14px) scale(.96)}to{opacity:1;transform:none}}
+.pick{display:flex;align-items:center;gap:12px;min-width:0;min-height:88px;padding:12px;border-radius:18px;background:var(--surface);border:1px solid rgba(74,222,128,.3);text-align:left;transition:transform .15s}
+.pick:active,.reroll:active{transform:scale(.97)}
+.pick .pimg{flex:none;width:54px;height:54px;border-radius:17px;object-fit:cover}
+.pbody{flex:1;min-width:0}
+.pbody b{display:block;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pbody small{display:block;margin-top:1px;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pbody i{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:4px;font-size:13px;color:var(--muted)}
+.reroll{display:grid;place-items:center;align-content:center;gap:5px;border-radius:18px;background:var(--surface);border:1px solid var(--line);color:var(--accent);font-size:12px;font-weight:800;line-height:1.15;text-align:center;transition:transform .15s}
+.reroll svg{width:26px;height:26px}
+.shelf-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-8px 0 2px}
+.shelf-row .shelf{margin:0 4px;color:var(--accent)}
+.shelf-row .shelf::before{content:"";display:inline-block;width:8px;height:8px;margin-right:8px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor;vertical-align:1px}
+.shelf-row .mini-btn{height:44px}
+
+/* ---------- Personen ---------- */
+.whos{display:flex;flex-wrap:wrap;gap:8px}
+.people{display:flex;align-items:center;gap:8px;overflow-x:auto;padding:0 16px 14px;margin:-4px -16px 0;scrollbar-width:none}
+.people::-webkit-scrollbar{display:none}
+.people>span{flex:none;margin:0 2px 0 4px;font-size:12.5px;font-weight:750;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.who,.pchip{flex:none;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:999px;background:var(--surface);border:2px solid transparent;color:var(--muted);font-size:14px;font-weight:750;transition:border-color .2s,color .2s,background .2s}
+.who[aria-pressed="true"],.pchip[aria-pressed="true"]{border-color:var(--accent);color:var(--text);background:var(--surface2)}
+.pchip{padding:0 12px 0 5px}
+.pchip .av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:rgba(var(--accent-rgb),.2);color:var(--accent);font-size:14px;font-weight:900}
+.pchip .n{color:var(--good);font-size:13px;font-weight:800}
+#f-a{margin-top:10px}
+.plist{display:grid;gap:8px}
+@media (min-width:620px){.plist{grid-template-columns:1fr 1fr}}
+.prow{display:flex;align-items:center;gap:12px;width:100%;min-width:0;padding:12px;border-radius:16px;background:var(--surface);border:1px solid rgba(74,222,128,.22);text-align:left;transition:transform .15s}
+.prow:active{transform:scale(.98)}
+.prow .pimg{flex:none;width:54px;height:54px;border-radius:17px;object-fit:cover}
+
+/* ---------- Leerer Zustand ---------- */
+.empty .art{width:min(100%,300px);margin-bottom:-4px}
+.empty .art svg{width:100%;height:auto;overflow:visible}
+.steps{list-style:none;display:grid;gap:8px;width:100%;max-width:360px;margin:14px 0 4px;padding:0;text-align:left}
+.steps li{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}
+.steps .num{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);font-weight:900}
+.steps b{display:block}
+.steps small{display:block;color:var(--muted);font-size:13px}
 
 /* ---------- Fotos ---------- */
 .thumb{position:relative;flex:none;width:54px;height:54px}
@@ -264,6 +338,12 @@ svg{display:block;max-width:100%}
 .grab{display:block;width:100%;height:22px;margin:-4px 0 6px}
 .grab::before{content:"";display:block;width:42px;height:5px;border-radius:3px;background:var(--line);margin:8px auto 0}
 .sheet h2{margin:0 0 16px;font-size:21px}
+/* Schließen-X: klebt beim Scrollen oben rechts im Sheet (Hülle ohne Höhe, damit nichts verrutscht) */
+.sheet-top{position:sticky;top:0;height:0;z-index:5}
+.sheet-x{position:absolute;top:2px;right:-6px;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);color:var(--muted);box-shadow:0 4px 14px -4px rgba(0,0,0,.6);transition:transform .15s,color .2s}
+.sheet-x:active{transform:scale(.92)}
+.sheet-x svg{width:20px;height:20px}
+.sheet>h2,.sheet .sh-head{padding-right:46px}
 .sh-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
 .sh-head h2{margin:0}
 .field{margin-bottom:16px}
@@ -373,10 +453,11 @@ html.theming *{transition:background-color .35s,border-color .35s,color .35s,box
 
 /* ===================== Grundlagen ===================== */
 const $ = (s, r = document) => r.querySelector(s);
-const LS = { data: 'nochmal_v1', user: 'nochmal_user', anim: 'nochmal_anim', accent: 'nochmal_accent' };
+const LS = { data: 'nochmal_v1', user: 'nochmal_user', anim: 'nochmal_anim', accent: 'nochmal_accent', inbox: 'nochmal_inbox', alias: 'nochmal_alias' };
 const store = {
   get(k, f) { try { const v = localStorage.getItem(k); return v == null ? f : JSON.parse(v); } catch (e) { return f; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} }
 };
 const VERDICT = {
   good: { sym: '✓', short: 'Wieder', label: 'Wieder bestellen', emoji: '🟢' },
@@ -413,7 +494,7 @@ const PRESETS = [
   { name: 'Türkis', hex: '#4fd1c5' }, { name: 'Rosé', hex: '#f49ac1' }
 ];
 let accent = store.get(LS.accent, PRESETS[0].hex);
-const ui = { view: 'home', rKey: null, q: '', cuisine: 'all', fresh: new Set(), homeScroll: 0, edit: null, dishCtx: null, sheetLocked: false };
+const ui = { view: 'home', rKey: null, q: '', cuisine: 'all', fresh: new Set(), homeScroll: 0, edit: null, dishCtx: null, sheetLocked: false, pick: null, rollT: 0, person: null, importData: null };
 
 const persist = () => { if (!store.set(LS.data, { v: 1, entries })) toast('Speichern fehlgeschlagen – Speicher voll oder gesperrt?'); };
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -612,6 +693,8 @@ const SVG = {
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
   share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M7 8l5-5 5 5"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>',
   inbox: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>',
+  dice: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><g fill="currentColor" stroke="none"><circle cx="8.6" cy="8.6" r="1.5"/><circle cx="15.4" cy="8.6" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="8.6" cy="15.4" r="1.5"/><circle cx="15.4" cy="15.4" r="1.5"/></g></svg>',
+  close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   camera: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg>'
 };
 const SCOOTER = `<svg viewBox="-24 0 144 72" aria-hidden="true">
@@ -635,6 +718,18 @@ const SCOOTER = `<svg viewBox="-24 0 144 72" aria-hidden="true">
   <g class="wheel"><circle cx="28" cy="57" r="9" fill="#2b2533" stroke="#e7e2ee" stroke-width="3"/><path d="M28 50 V64 M21 57 H35" stroke="#8d8599" stroke-width="2"/></g>
   <g class="wheel"><circle cx="88" cy="57" r="9" fill="#2b2533" stroke="#e7e2ee" stroke-width="3"/><path d="M88 50 V64 M81 57 H95" stroke="#8d8599" stroke-width="2"/></g>
 </svg>`;
+// Geparkter Roller für Startseite & leeren Zustand: gleicher SCOOTER, plus Ständer, Schatten und Dampf aus der Lieferbox
+const STEAM = `<g class="steam" fill="none" stroke="#f4efe9" stroke-width="2.2" stroke-linecap="round"><path d="M18 12 q-3 -4 0 -8 q3 -4 0 -8"/><path d="M25 10 q-3 -4 0 -8 q3 -4 0 -8"/><path d="M32 12 q-3 -4 0 -8 q3 -4 0 -8"/></g>`;
+const parked = (viewBox, extra = '') => SCOOTER
+  .replace('viewBox="-24 0 144 72"', `viewBox="${viewBox}"`)
+  .replace('<path d="M91 33 L118 26 V40Z"', '<path class="beam" d="M91 33 L118 26 V40Z"') // geparkt: Licht aus
+  .replace('<g class="speed"', '<ellipse cx="58" cy="67" rx="44" ry="3" fill="rgba(0,0,0,.35)"/><g class="speed"')
+  .replace(/<\/svg>$/, `<path d="M58 52 L52 66" stroke="#8d8599" stroke-width="3" stroke-linecap="round"/>${STEAM}${extra}</svg>`);
+const BAG = `<ellipse cx="139" cy="67" rx="20" ry="3" fill="rgba(0,0,0,.35)"/>
+  <path d="M122 38 H156 L154 66 H124Z" fill="#c9a27e"/><path d="M122 38 H156 L153 33 H125Z" fill="#a8835f"/>
+  <path d="M131 33 q0 -9 8 -9 q8 0 8 9" fill="none" stroke="#8a6a4e" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="139" cy="51" r="7.5" style="fill:var(--accent)"/><text x="139" y="54.5" text-anchor="middle" font-size="8" font-weight="900" font-family="system-ui,sans-serif" style="fill:var(--accent-ink)">N?</text>
+  <g transform="translate(116 20)">${STEAM}</g>`;
 
 /* ===================== Fotos (IndexedDB) ===================== */
 // Fotos sind zu groß für localStorage → eigene IndexedDB „nochmal“ (bleibt lokal auf dem Gerät, kostet nichts).
@@ -700,6 +795,11 @@ function groupRestaurants() {
     return r;
   }).sort((a, b) => b.last - a.last);
 }
+// Bearbeiten darf, wer den Eintrag geschrieben hat – auch wenn er im Namen einer anderen Person angelegt wurde (by)
+const canEdit = e => e.author === user || e.by === user;
+// Alle Personen: ich zuerst, dann der Rest alphabetisch
+const people = () => [user, ...[...new Set(live().map(e => e.author))].filter(a => a !== user).sort((a, b) => a.localeCompare(b, 'de'))].filter(Boolean);
+const lovedBy = (d, p) => d.byAuthor.some(e => e.author === p && e.verdict === 'good');
 const currentRestaurant = () => groupRestaurants().find(r => r.key === ui.rKey);
 const pillsHTML = t => ['good', 'mixed', 'ok', 'bad'].filter(k => t[k]).map(k => `<span class="pill ${k}">${SYM[k]} ${t[k]}</span>`).join('');
 
@@ -731,16 +831,109 @@ const headerHTML = () => `<header class="top"><div class="brand">${ico('other', 
 
 function renderHome(opts = {}) {
   const view = $('#view');
-  if (!live().length) {
-    view.innerHTML = headerHTML() + `<div class="empty">${ico('other', 'big', 'var(--accent)')}
-      <h2>Noch nichts bewertet</h2>
-      <p>Nach der nächsten Lieferung: Restaurant, Gericht, Ampel. Beim nächsten Hunger weißt du sofort, was sich lohnt – und was nie wieder.</p>
-      <div class="btns"><button class="btn primary" data-act="add">Ersten Eintrag anlegen</button><button class="btn ghost" data-act="demo">Demo-Daten ansehen</button><button class="btn ghost" data-act="import">${SVG.inbox} Datei importieren</button></div></div>`;
-    return;
-  }
-  view.innerHTML = headerHTML() + `<div class="searchwrap"><label class="search">${SVG.search}<input id="q" type="search" placeholder="Restaurant oder Gericht suchen" value="${esc(ui.q)}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Suchen"></label></div><div class="cats" id="cats"></div>${hasDemo() ? `<div class="demo-banner"><span><b>Demo-Daten aktiv</b> – werden nie geteilt oder exportiert</span><button data-act="remove-demo">Entfernen</button></div>` : ''}<div id="favs"></div><div id="list"></div>`;
+  if (!live().length) { view.innerHTML = headerHTML() + emptyHTML(); return; }
+  view.innerHTML = headerHTML() + `<div id="dash" class="dash${opts.stagger ? ' stagger' : ''}">${dashHTML()}</div><div class="searchwrap"><label class="search">${SVG.search}<input id="q" type="search" placeholder="Restaurant oder Gericht suchen" value="${esc(ui.q)}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Suchen"></label></div><div class="cats" id="cats"></div><div class="people" id="people" hidden></div>${hasDemo() ? `<div class="demo-banner"><span><b>Demo-Daten aktiv</b> – werden nie geteilt oder exportiert</span><button data-act="remove-demo">Entfernen</button></div>` : ''}<h4 class="shelf" id="lhead"></h4><div id="list"></div>`;
   renderList(opts.stagger);
+  if (opts.stagger && !$('#dash').hidden) countUp($('#dash'));
 }
+function emptyHTML() {
+  return `<div class="empty stagger"><div class="art" aria-hidden="true" style="--i:0">${parked('2 -16 160 88', BAG)}</div>
+    <h2 style="--i:1">Noch nichts bewertet</h2>
+    <p style="--i:2">Beim nächsten Hunger weißt du sofort, was sich lohnt – und was nie wieder.</p>
+    <ol class="steps" style="--i:3"><li><span class="num">1</span><div><b>Bestellen</b><small>Wie immer, beim Lieferdienst deiner Wahl.</small></div></li>
+      <li><span class="num">2</span><div><b>Bewerten</b><small>Nach dem Essen: <span class="v-good">✓</span> wieder, <span class="v-ok">~</span> okay oder <span class="v-bad">✕</span> nie wieder.</small></div></li>
+      <li><span class="num">3</span><div><b>Nie wieder danebengreifen</b><small>Nochmal? merkt sich, was sich lohnt.</small></div></li></ol>
+    <div class="btns" style="--i:4"><button class="btn primary" data-act="add">Ersten Eintrag anlegen</button><button class="btn ghost" data-act="demo">Demo-Daten ansehen</button><button class="btn ghost" data-act="import">${SVG.inbox} Datei importieren</button></div></div>`;
+}
+
+/* ===================== Dashboard ===================== */
+// Liegt über Suche/Küchen/Liste. Nur sichtbar ohne Suchtext und ohne Küchen-Filter; Demo-Daten zählen mit.
+const dashOn = () => !norm(ui.q) && ui.cuisine === 'all' && !ui.person;
+function greeting() {
+  const h = new Date().getHours(), n = user ? `, ${user}` : '';
+  if (h >= 5 && h < 11) return [`Guten Morgen${n}!`, 'Schon gefrühstückt?'];
+  if (h >= 11 && h < 14) return [`Mahlzeit${n}!`, 'Worauf hast du heute Lust?'];
+  if (h >= 14 && h < 17) return [`Schönen Nachmittag${n}!`, 'Kleiner Snack zwischendurch?'];
+  if (h >= 17 && h < 22) return [`Guten Abend${n}!`, 'Zeit für Sofa und Lieferung.'];
+  return [`Späthunger${n}?`, 'Mal sehen, wer jetzt noch liefert.'];
+}
+const goodDishes = rs => rs.flatMap(r => r.dishes.filter(d => d.status === 'good').map(d => ({ r, d })));
+function dashHTML() {
+  const rs = groupRestaurants(), dishes = rs.flatMap(r => r.dishes), good = goodDishes(rs);
+  const authors = new Set(live().map(e => e.author));
+  // Mehrere Autoren: nur was alle mit ✓ bewertet haben (Status good + jeder Autor hat eine Bewertung)
+  const favs = good.filter(x => x.d.byAuthor.length === authors.size).sort((a, b) => b.d.last - a.d.last).slice(0, 10);
+  const ib = inbox(), [hi, sub] = greeting();
+  let i = 0; const sec = (cls, html) => `<section class="${cls}" style="--i:${i++}">${html}</section>`;
+  const stat = (n, label, cls = '') => `<div class="stat ${cls}"><b data-n="${n}">${n}</b><span>${label}</span></div>`;
+  return sec('hello', `<div><h2>${esc(hi)}</h2><p>${sub}</p></div><span class="scene" aria-hidden="true">${parked('2 -18 118 90')}</span>`)
+    + sec('stats', stat(rs.length, 'Restaurants') + stat(dishes.length, 'Gerichte') + stat(dishes.filter(d => d.status === 'bad').length, '✕ Nie wieder', 'bad'))
+    + sec('', good.length ? `<div id="roll">${rollIdleHTML(good)}</div>` : '<p class="roll-hint">Noch kein Gericht mit <span class="v-good">✓</span> – sobald dir etwas schmeckt, schlägt Nochmal? es hier vor.</p>')
+    + (ib ? sec('', `<div class="shelf-row"><h4 class="shelf">Neu von ${esc(ib.from)}</h4><button class="mini-btn" data-act="inbox-seen">Gesehen</button></div><div class="favs">${ib.list.map(e => tileHTML({ rKey: norm(e.restaurant), rName: e.restaurant, cuisine: (CMAP[e.cuisine] ? e.cuisine : 'other'), dish: e.dish, photo: photoOf(e), verdict: e.verdict })).join('')}</div>`) : '')
+    + (favs.length ? sec('', `<h4 class="shelf">${authors.size > 1 ? 'Eure' : 'Deine'} Lieblinge</h4><div class="favs">${favs.map(({ r, d }) => tileHTML({ rKey: r.key, rName: r.name, cuisine: r.cuisine, dish: d.name, photo: d.photo, verdict: 'good' })).join('')}</div>`) : '');
+}
+function tileHTML({ rKey, rName, cuisine, dish, photo, verdict }) {
+  const c = CMAP[cuisine] || CMAP.other;
+  return `<button class="fav" data-act="open" data-key="${esc(rKey)}" style="--c:${c.c}">
+    <span class="fimg">${photo ? `<img src="${esc(photo)}" alt="" loading="lazy">` : ico(cuisine, 'big')}<span class="fbadge ${verdict}">${SYM[verdict]}</span></span><b>${esc(dish)}</b><small>${esc(rName)}</small></button>`;
+}
+function countUp(root) {
+  if (!animOn()) return;
+  const els = [...root.querySelectorAll('[data-n]')], t0 = performance.now();
+  const step = now => {
+    const k = Math.min(1, (now - t0) / 600), f = 1 - Math.pow(1 - k, 3);
+    els.forEach(el => { el.textContent = Math.round(+el.dataset.n * f); });
+    if (k < 1) requestAnimationFrame(step);
+  };
+  els.forEach(el => { el.textContent = '0'; });
+  requestAnimationFrame(step);
+}
+// „Neu von …“: nochmal_inbox = { from, ids, at }, 7 Tage gültig; gelöschte/fehlende IDs fallen raus
+function inbox() {
+  const ib = store.get(LS.inbox, null);
+  if (!ib || !Array.isArray(ib.ids) || !(Date.now() - ib.at < 7 * 86400000)) { if (ib) store.del(LS.inbox); return null; }
+  const byId = new Map(live().map(e => [e.id, e])), seen = new Set(), list = [];
+  for (const id of ib.ids) {
+    const e = byId.get(id), k = e && norm(e.restaurant) + '|' + norm(e.dish);
+    if (e && !seen.has(k)) { seen.add(k); list.push(e); }
+  }
+  return list.length ? { from: String(ib.from || 'Unbekannt'), list: list.sort((a, b) => b.updatedAt - a.updatedAt) } : null;
+}
+function noteInbox(fresh, from) {
+  const foreign = [...fresh].map(id => entries.find(e => e.id === id)).filter(e => e && !e.deleted && e.author !== user);
+  if (!foreign.length) return;
+  const who = from && from !== user ? from : foreign[0].author, prev = store.get(LS.inbox, null);
+  const ids = foreign.map(e => e.id).concat(prev && prev.from === who && Array.isArray(prev.ids) ? prev.ids : []);
+  store.set(LS.inbox, { from: who, ids: [...new Set(ids)], at: Date.now() });
+}
+
+/* ===================== Was gibt's heute? ===================== */
+const pickHTML = ({ r, d }) => `<div class="pick-row"><button class="pick" data-act="open" data-key="${esc(r.key)}">
+    ${d.photo ? `<img class="pimg" src="${esc(d.photo)}" alt="">` : ico(r.cuisine)}<span class="pbody"><b><span class="v-good">✓</span> ${esc(d.name)}</b><small>${esc(r.name)}${d.price != null ? ' · ' + fmtPrice(d.price) : ''}</small>${d.note ? `<i>„${esc(d.note)}“</i>` : ''}</span></button>
+    <button class="reroll" data-act="roll">${SVG.dice}<span>Nochmal<br>würfeln</span></button></div>`;
+function rollIdleHTML(good) {
+  const p = ui.pick && good.find(x => x.r.key === ui.pick.rKey && x.d.key === ui.pick.dKey);
+  return p ? pickHTML(p) : `<button class="btn primary roll-btn" data-act="roll">${SVG.dice}Was gibt’s heute?</button>`;
+}
+function roll() {
+  const box = $('#roll'), pool = goodDishes(groupRestaurants());
+  if (!box || !pool.length) return;
+  let p = pool[Math.floor(Math.random() * pool.length)];
+  for (let n = 0; pool.length > 1 && ui.pick && p.r.key === ui.pick.rKey && p.d.key === ui.pick.dKey && n < 20; n++) p = pool[Math.floor(Math.random() * pool.length)];
+  ui.pick = { rKey: p.r.key, dKey: p.d.key };
+  clearTimeout(ui.rollT);
+  if (!animOn()) { box.innerHTML = pickHTML(p); return; }
+  // Slot-Machine: drei Walzen mit zufälligen Küchen-Icons, alle landen auf der Küche des Gewinners
+  const ids = CUISINES.map(c => c.id), N = 12;
+  const reel = (i, d) => { let s = ''; for (let k = 0; k < N; k++) s += `<span>${ico(ids[(Math.random() * ids.length) | 0], 'mid')}</span>`;
+    return `<div class="reel"><div class="reel-strip" style="--d:${d}s;--end:${-64 * N}px">${s}<span>${ico(p.r.cuisine, 'mid')}</span></div></div>`; };
+  box.innerHTML = `<div class="slot" aria-label="Würfelt …">${reel(0, .8)}${reel(1, 1)}${reel(2, 1.2)}</div>`;
+  ui.rollT = setTimeout(() => {
+    if (!box.isConnected) return;
+    box.innerHTML = pickHTML(p); restart(box.firstElementChild, 'land');
+  }, 1300);
+}
+
 function renderList(stagger) {
   const all = groupRestaurants(), count = {};
   for (const r of all) count[r.cuisine] = (count[r.cuisine] || 0) + 1;
@@ -748,17 +941,25 @@ function renderList(stagger) {
   $('#cats').innerHTML = catHTML('all', 'Alle', all.length, 'var(--accent)') +
     CUISINES.filter(c => count[c.id]).map(c => catHTML(c.id, c.label, count[c.id], c.c)).join('');
 
+  const ps = people(), pe = $('#people');
+  if (ui.person && !ps.includes(ui.person)) ui.person = null;
+  pe.hidden = ps.length < 2;
+  pe.innerHTML = ps.length < 2 ? '' : '<span>Lieblinge von</span>' + ps.map(p => {
+    const n = all.reduce((s, r) => s + r.dishes.filter(d => lovedBy(d, p)).length, 0);
+    return `<button class="pchip" data-act="person" data-p="${esc(p)}" aria-pressed="${ui.person === p}"><span class="av">${esc(p.slice(0, 1).toUpperCase())}</span>${esc(p)}<span class="n">✓ ${n}</span></button>`;
+  }).join('');
+
   const q = norm(ui.q); const hits = new Map();
   let list = all.filter(r => ui.cuisine === 'all' || r.cuisine === ui.cuisine);
+  if (ui.person) return renderPersonList(list, q, stagger);
   if (q) list = list.filter(r => {
     const dh = r.dishes.filter(d => norm(d.name).includes(q));
     if (dh.length) hits.set(r.key, dh);
     return norm(r.name).includes(q) || dh.length;
   });
   const el = $('#list');
-  // Lieblinge: alles mit ✓, neueste zuerst – nur ohne Suche, damit die Treffer oben stehen
-  const favs = q ? [] : list.flatMap(r => r.dishes.filter(d => d.status === 'good').map(d => ({ r, d }))).sort((a, b) => b.d.last - a.d.last).slice(0, 12);
-  $('#favs').innerHTML = favs.length ? `<h4 class="shelf">Lieblinge</h4><div class="favs">${favs.map(favHTML).join('')}</div><h4 class="shelf">Restaurants <small>${list.length}</small></h4>` : '';
+  $('#dash').hidden = !dashOn(); // nur umschalten, nicht neu rendern – sonst flackert es beim Tippen
+  $('#lhead').innerHTML = list.length ? `${q ? 'Treffer' : ui.cuisine !== 'all' ? esc(CMAP[ui.cuisine].label) : 'Alle Restaurants'} <small>${list.length}</small>` : '';
   if (!list.length) {
     el.className = '';
     el.innerHTML = q
@@ -769,12 +970,25 @@ function renderList(stagger) {
   el.className = 'list' + (stagger ? ' stagger' : '');
   el.innerHTML = list.map((r, i) => cardHTML(r, i, hits.get(r.key))).join('');
 }
-const catHTML = (id, label, n, color) => `<button class="cbtn" data-act="cuisine" data-c="${id}" style="--c:${color}" aria-pressed="${ui.cuisine === id}">${ico(id, 'mid', color)}${esc(label)}<span class="cnt">${n}</span></button>`;
-function favHTML({ r, d }) {
-  const c = CMAP[r.cuisine] || CMAP.other;
-  return `<button class="fav" data-act="fav" data-key="${esc(r.key)}" data-dish="${esc(d.key)}" style="--c:${c.c}">
-    <span class="fimg">${d.photo ? `<img src="${esc(d.photo)}" alt="" loading="lazy">` : ico(r.cuisine, 'big')}<span class="fbadge">✓</span></span><b>${esc(d.name)}</b><small>${esc(r.name)}</small></button>`;
+// Personen-Filter: alle Gerichte, die diese Person zuletzt mit ✓ bewertet hat – Suche filtert darin
+function renderPersonList(rs, q, stagger) {
+  const p = ui.person, el = $('#list');
+  const rows = rs.flatMap(r => r.dishes.filter(d => lovedBy(d, p)).map(d => ({ r, d, e: d.byAuthor.find(x => x.author === p) })))
+    .filter(x => !q || norm(x.d.name).includes(q) || norm(x.r.name).includes(q))
+    .sort((a, b) => b.e.createdAt - a.e.createdAt);
+  $('#dash').hidden = true;
+  $('#lhead').innerHTML = `<span class="v-good">✓</span> Lieblinge von ${esc(p)} <small>${rows.length}</small>`;
+  if (!rows.length) {
+    el.className = '';
+    el.innerHTML = `<div class="noresult"><p>${q ? `Keine ✓-Gerichte von ${esc(p)} für „${esc(ui.q)}“.` : `${esc(p)} hat${ui.cuisine !== 'all' ? ' in dieser Küche' : ''} noch nichts mit ✓ bewertet.`}</p></div>`;
+    return;
+  }
+  el.className = 'plist' + (stagger ? ' stagger' : '');
+  el.innerHTML = rows.map(({ r, d, e }, i) => { const ph = photoOf(e) || d.photo;
+    return `<button class="prow" data-act="open-dish" data-key="${esc(r.key)}" data-dish="${esc(d.key)}" style="--i:${Math.min(i, 12)}">
+      ${ph ? `<img class="pimg" src="${esc(ph)}" alt="" loading="lazy">` : ico(r.cuisine)}<span class="pbody"><b>${esc(d.name)}</b><small>${esc(r.name)}${d.price != null ? ' · ' + fmtPrice(d.price) : ''} · ${relDate(e.createdAt)}</small>${e.note ? `<i>„${esc(e.note)}“</i>` : ''}</span></button>`; }).join('');
 }
+const catHTML = (id, label, n, color) => `<button class="cbtn" data-act="cuisine" data-c="${id}" style="--c:${color}" aria-pressed="${ui.cuisine === id}">${ico(id, 'mid', color)}${esc(label)}<span class="cnt">${n}</span></button>`;
 function cardHTML(r, i, hit) {
   const c = CMAP[r.cuisine] || CMAP.other;
   let peek;
@@ -815,7 +1029,8 @@ function dishHTML(d, i) {
 /* ===================== Sheets ===================== */
 function openSheet(html, onMount) {
   const sh = $('#sheet'), bd = $('#backdrop'), wasOpen = sh.classList.contains('open');
-  sh.innerHTML = html; sh.scrollTop = 0;
+  // X zum Schließen überall – außer beim Namens-Sheet, das bewusst nicht wegklickbar ist
+  sh.innerHTML = (ui.sheetLocked ? '' : `<div class="sheet-top"><button class="sheet-x" data-act="close" aria-label="Schließen">${SVG.close}</button></div>`) + html; sh.scrollTop = 0;
   if (!wasOpen) {
     sh.hidden = false; bd.hidden = false; void sh.offsetHeight;
     sh.classList.add('open'); bd.classList.add('open'); document.body.classList.add('locked');
@@ -863,7 +1078,7 @@ function openDish(dKey) {
     ${d.photos.length ? `<div class="photos${d.photos.length > 1 ? ' multi' : ''}">${d.photos.map(p => `<img src="${esc(p)}" alt="Foto: ${esc(d.name)}">`).join('')}</div>` : ''}
     <div class="hist">${d.entries.map(e => `<div class="hitem"><span class="vote ${e.verdict}"><span class="sym">${VERDICT[e.verdict].sym}</span>${VERDICT[e.verdict].short}</span>
       <div class="hmeta"><b>${esc(e.author)}</b> · ${relDate(e.createdAt)}${e.price != null ? ' · ' + fmtPrice(e.price) : ''}${e.note ? `<div class="note">„${esc(e.note)}“</div>` : ''}</div>
-      ${e.author === user ? `<button class="mini-btn" data-act="edit" data-id="${esc(e.id)}">Ändern</button>` : '<span></span>'}</div>`).join('')}</div>
+      ${canEdit(e) ? `<button class="mini-btn" data-act="edit" data-id="${esc(e.id)}">Ändern</button>` : '<span></span>'}</div>`).join('')}</div>
     <div class="btns"><button class="btn primary" data-act="rate-again">Neu bewerten</button><button class="btn ghost" data-act="share-dish">${SVG.share} Teilen</button></div>`);
 }
 function openEditor({ id = null, restaurant = '', cuisine = null, dish = '' } = {}) {
@@ -871,7 +1086,7 @@ function openEditor({ id = null, restaurant = '', cuisine = null, dish = '' } = 
   const rs = groupRestaurants();
   const rName = e ? e.restaurant : restaurant;
   const match = rs.find(r => r.key === norm(rName));
-  ui.edit = { id, st: { verdict: e ? e.verdict : null, cuisine: e ? e.cuisine : (cuisine || match?.cuisine || 'other'), photo: e ? photoOf(e) : null } };
+  ui.edit = { id, st: { verdict: e ? e.verdict : null, cuisine: e ? e.cuisine : (cuisine || match?.cuisine || 'other'), photo: e ? photoOf(e) : null, author: e ? e.author : user } };
   const st = ui.edit.st;
   openSheet(`<button class="grab" data-act="close" aria-label="Schließen"></button><h2>${e ? 'Eintrag ändern' : 'Wie war’s?'}</h2>
     <div class="field"><label for="f-r">Restaurant</label><input class="inp" id="f-r" list="dl-r" value="${esc(rName)}" placeholder="z. B. Sultan Kebab" autocomplete="off" autocapitalize="words" enterkeyhint="next"><datalist id="dl-r">${rs.map(r => `<option value="${esc(r.name)}">`).join('')}</datalist></div>
@@ -879,10 +1094,23 @@ function openEditor({ id = null, restaurant = '', cuisine = null, dish = '' } = 
     <div class="field row2"><div><label for="f-d">Gericht</label><input class="inp" id="f-d" list="dl-d" value="${esc(e ? e.dish : dish)}" placeholder="z. B. Lamm-Dürüm" autocomplete="off" enterkeyhint="next"><datalist id="dl-d"></datalist></div>
       <div><label for="f-p">Preis</label><input class="inp" id="f-p" inputmode="decimal" placeholder="9,50" value="${e && e.price != null ? String(e.price).replace('.', ',') : ''}" enterkeyhint="next"></div></div>
     <div class="field"><span class="lbl">Urteil</span><div class="verdicts" id="verdicts">${['good', 'ok', 'bad'].map(v => `<button type="button" class="vbtn ${v}" data-act="verdict" data-v="${v}" aria-pressed="${st.verdict === v}"><span class="sym">${VERDICT[v].sym}</span>${VERDICT[v].short}</button>`).join('')}</div></div>
+    <div class="field"><span class="lbl">Bewertet von</span><div class="whos" id="whos">${whoHTML()}</div><input class="inp" id="f-a" placeholder="Name der Person" maxlength="24" autocomplete="off" autocapitalize="words" enterkeyhint="next" hidden></div>
     <div class="field"><span class="lbl">Foto <span style="font-weight:500">(optional)</span></span><div id="photo-slot">${photoSlotHTML(st.photo)}</div></div>
     <div class="field"><label for="f-n">Notiz <span style="font-weight:500">(optional)</span></label><textarea class="inp" id="f-n" rows="3" placeholder="Was war gut, was nicht? Kam es warm an?">${esc(e ? e.note : '')}</textarea></div>
     <div class="btns"><button class="btn primary" data-act="save">Speichern</button>${e ? '<button class="btn danger" data-act="delete">Löschen</button>' : ''}</div>`,
     () => fillDishList(match));
+}
+function whoHTML() {
+  const a = ui.edit.st.author, ps = people();
+  if (a && !ps.includes(a)) ps.push(a);
+  return ps.map(p => `<button type="button" class="who" data-act="pick-who" data-name="${esc(p)}" aria-pressed="${a === p}">${esc(p)}${p === user ? ' (ich)' : ''}</button>`).join('')
+    + `<button type="button" class="who" data-act="pick-who" data-name="" aria-pressed="${a === null}">+ Andere Person</button>`;
+}
+function pickWho(name) {
+  ui.edit.st.author = name || null;
+  $('#whos').innerHTML = whoHTML();
+  const inp = $('#f-a'); inp.hidden = !!name;
+  if (!name) inp.focus();
 }
 const photoSlotHTML = p => p
   ? `<div class="pslot has"><img src="${esc(p)}" alt="Foto vom Gericht"><div class="pacts"><button type="button" class="mini-btn" data-act="pick-photo">Ändern</button><button type="button" class="mini-btn" data-act="drop-photo">Entfernen</button></div></div>`
@@ -939,15 +1167,20 @@ function saveEntry() {
   if (!dish) return fieldErr('#f-d', 'Welches Gericht?');
   if (Number.isNaN(price)) return fieldErr('#f-p', 'Preis bitte als Zahl, z. B. 9,50');
   if (!st.verdict) { restart($('#verdicts'), 'thud'); return toast('Wie war’s? Tipp auf die Ampel.'); }
+  let author = st.author ?? $('#f-a').value.trim().replace(/\s+/g, ' ');
+  if (!author) return fieldErr('#f-a', 'Für wen ist die Bewertung?');
+  author = people().find(p => norm(p) === norm(author)) || author; // gleiche Schreibweise wie vorhandene Person
+  const by = author !== user ? user : null; // im Namen einer anderen Person angelegt → ich darf weiter ändern
   const existing = groupRestaurants().find(r => r.key === norm(restaurant));
   const rName = existing ? existing.name : restaurant; // gleiche Schreibweise beibehalten
   const now = Date.now(), photo = st.photo || null; let id;
   if (isEdit) {
     const e = entries.find(x => x.id === ui.edit.id);
-    Object.assign(e, { restaurant: rName, cuisine: st.cuisine, dish, price, verdict: st.verdict, note, updatedAt: now }); id = e.id;
+    Object.assign(e, { restaurant: rName, cuisine: st.cuisine, dish, price, verdict: st.verdict, note, author, updatedAt: now }); id = e.id;
+    if (by) e.by = by; else delete e.by;
   } else {
     id = uuid();
-    entries.push({ id, restaurant: rName, cuisine: st.cuisine, dish, price, verdict: st.verdict, note, author: user, createdAt: now, updatedAt: now, deleted: false });
+    entries.push({ id, restaurant: rName, cuisine: st.cuisine, dish, price, verdict: st.verdict, note, author, ...(by ? { by } : {}), createdAt: now, updatedAt: now, deleted: false });
   }
   if (photo !== (photos.get(id) || null)) {
     setPhoto(id, photo).then(ok => { if (!ok) toast('Foto konnte nicht gespeichert werden'); });
@@ -963,7 +1196,7 @@ function saveEntry() {
       if (verdict === 'bad' && animOn()) { const s = row.querySelector('.stamp'); if (s) restart(s, 'slam'); restart(row, 'thud'); }
     }
     if (!isEdit) scooter('ltr', 'Geliefert!');
-    toast(isEdit ? 'Änderung gespeichert' : 'Gespeichert');
+    toast((isEdit ? 'Änderung gespeichert' : 'Gespeichert') + (by ? ` – für ${author}` : ''));
   };
   if (ui.view === 'detail' && ui.rKey === rKey) { renderDetail(); setTimeout(after, 60); }
   else openRestaurant(rKey, null, { noStagger: true }).then(after);
@@ -979,7 +1212,9 @@ function deleteEntry() {
 /* ===================== Teilen / Import ===================== */
 function payload(list, header) {
   // v2: Einträge können ein Foto (photo) haben – alte v1-Dateien bleiben lesbar
-  const withPhotos = list.map(e => photos.has(e.id) ? { ...e, photo: photos.get(e.id) } : e);
+  // Umbenennungen aus dem Import zurückübersetzen, damit die andere Person ihre Einträge unter ihrem eigenen Namen bekommt
+  const back = new Map(Object.entries(store.get(LS.alias, {})).map(([o, n]) => [n, o])), orig = a => back.get(a) ?? a;
+  const withPhotos = list.map(e => ({ ...e, author: orig(e.author), ...(e.by ? { by: orig(e.by) } : {}), ...(photos.has(e.id) ? { photo: photos.get(e.id) } : {}) }));
   const json = JSON.stringify({ app: 'nochmal', v: 2, from: user, exportedAt: Date.now(), entries: withPhotos });
   return `${header}\n\nIn „Nochmal?“ öffnen: Einstellungen → Datei importieren.\n---\n${json}`;
 }
@@ -1025,7 +1260,7 @@ function clean(x) {
     price: typeof x.price === 'number' && isFinite(x.price) ? Math.round(x.price * 100) / 100 : null,
     verdict: x.verdict, note: s(x.note, 500),
     photo: typeof x.photo === 'string' && x.photo.length < 1500000 && /^data:image\/(jpeg|png|webp);base64,[a-z0-9+/]+=*$/i.test(x.photo) ? x.photo : null,
-    author: s(x.author, 24) || 'Unbekannt',
+    author: s(x.author, 24) || 'Unbekannt', ...(s(x.by, 24) ? { by: s(x.by, 24) } : {}),
     createdAt: num(x.createdAt), updatedAt: num(x.updatedAt), deleted: !!x.deleted };
 }
 function merge(list) {
@@ -1035,7 +1270,7 @@ function merge(list) {
     const { photo, ...x } = c; // Foto gehört in die IndexedDB, nicht in den Eintrag
     const ex = byId.get(x.id);
     if (!ex) { entries.push(x); byId.set(x.id, x); if (!x.deleted) { added++; fresh.add(x.id); } }
-    else if (x.updatedAt > ex.updatedAt) { Object.assign(ex, x); updated++; if (!x.deleted) fresh.add(x.id); }
+    else if (x.updatedAt > ex.updatedAt) { Object.assign(ex, x); if (!x.by) delete ex.by; updated++; if (!x.deleted) fresh.add(x.id); }
     else continue;
     if (photo || photos.has(x.id)) pics.set(x.id, x.deleted ? null : photo);
   }
@@ -1047,17 +1282,61 @@ $('#fileIn').addEventListener('change', async ev => {
   const f = ev.target.files[0]; ev.target.value = ''; if (!f) return;
   let data;
   try { data = parsePayload(await f.text()); } catch (e) { toast('Das ist keine gültige Nochmal?-Datei'); return; }
-  const res = merge(data.entries);
+  // Fremde Namen in der Datei? Erst fragen, wie sie bei mir heißen sollen
+  const others = [...fileAuthors(data)].filter(([a]) => a !== user);
+  if (others.length) openImportSheet(data, others); else applyImport(data, new Map());
+});
+// Wer steht wie oft in der Datei (nur gültige, nicht gelöschte Einträge)
+function fileAuthors(data) {
+  const m = new Map();
+  for (const raw of data.entries) { const c = clean(raw); if (c && !c.deleted) m.set(c.author, (m.get(c.author) || 0) + 1); }
+  return m;
+}
+function openImportSheet(data, others) {
+  const alias = store.get(LS.alias, {}), n = others.reduce((s, [, c]) => s + c, 0);
+  ui.importData = data; ui.sheetLocked = false;
+  openSheet(`<button class="grab" data-act="close" aria-label="Schließen"></button><h2>Import${data.from ? ` von ${esc(data.from)}` : ''}</h2>
+    <p class="hint" style="margin:-8px 2px 16px">${n} Bewertung${n === 1 ? '' : 'en'} von anderen. Wie sollen die Namen bei dir heißen?</p>
+    ${others.map(([a, c], i) => `<div class="field"><label for="f-al${i}">${esc(a)} · ${c} Bewertung${c === 1 ? '' : 'en'}</label><input class="inp" id="f-al${i}" data-old="${esc(a)}" value="${esc(alias[a] || a)}" maxlength="24" autocomplete="off" autocapitalize="words" enterkeyhint="done"></div>`).join('')}
+    <p class="hint">Gilt auch für vorhandene Einträge mit diesem Namen und für künftige Importe.</p>
+    <div class="btns" style="margin-top:16px"><button class="btn primary" data-act="import-go">Importieren</button><button class="btn ghost" data-act="close">Abbrechen</button></div>`);
+}
+function confirmImport() {
+  const data = ui.importData; if (!data) return;
+  const alias = store.get(LS.alias, {}), map = new Map();
+  for (const inp of document.querySelectorAll('#sheet [data-old]')) {
+    const old = inp.dataset.old; let v = inp.value.trim().replace(/\s+/g, ' ');
+    if (!v) return fieldErr('#' + inp.id, 'Name darf nicht leer sein');
+    if (norm(v) === norm(user)) return fieldErr('#' + inp.id, 'Das ist dein eigener Name');
+    v = people().find(p => norm(p) === norm(v)) || v;
+    if (v === old) delete alias[old]; else { alias[old] = v; map.set(old, v); }
+  }
+  store.set(LS.alias, alias);
+  ui.importData = null;
+  applyImport(data, map);
+}
+function applyImport(data, map) {
+  const ren = a => map.get(a) ?? a, cut = a => String(a ?? '').trim().slice(0, 24);
+  // Umbenennen gilt auch für vorhandene Einträge – updatedAt bleibt, sonst wäre es beim nächsten Abgleich ein „neuerer“ Stand
+  let renamed = 0;
+  if (map.size) for (const e of entries) {
+    if (map.has(e.author)) { e.author = ren(e.author); renamed++; }
+    if (e.by && map.has(e.by)) e.by = ren(e.by);
+  }
+  if (renamed) persist();
+  const list = map.size ? data.entries.map(x => x && typeof x === 'object' ? { ...x, author: ren(cut(x.author)), ...(x.by ? { by: ren(cut(x.by)) } : {}) } : x) : data.entries;
+  const res = merge(list);
+  noteInbox(res.fresh, data.from && ren(data.from));
   ui.sheetLocked = false; closeSheet();
-  if (!res.added && !res.updated) { toast('Alles schon bekannt – nichts Neues dabei'); return; }
+  if (!res.added && !res.updated) { if (renamed) rerender(); toast(renamed ? 'Nichts Neues – Namen angepasst' : 'Alles schon bekannt – nichts Neues dabei'); return; }
   ui.fresh = res.fresh; setTimeout(() => ui.fresh.clear(), 4000);
-  ui.q = ''; ui.cuisine = 'all';
+  ui.q = ''; ui.cuisine = 'all'; ui.person = null;
   if (ui.view === 'detail') history.back(); // zurück zur Übersicht
   ui.view = 'home'; renderHome({ stagger: true }); window.scrollTo(0, 0);
-  const from = data.from && data.from !== user ? data.from : null;
+  const from = data.from && ren(data.from) !== user ? ren(data.from) : null;
   scooter('rtl', from ? `Post von ${from}!` : 'Backup da!');
   toast([res.added && `${res.added} neu`, res.updated && `${res.updated} aktualisiert`].filter(Boolean).join(' · '));
-});
+}
 
 $('#photoIn').addEventListener('change', async ev => {
   const f = ev.target.files[0]; ev.target.value = ''; if (!f || !ui.edit) return;
@@ -1083,6 +1362,8 @@ const DEMO_ROWS = [
     ['Bombay Palace', 'curry', 'Butter Chicken', 15.9, 'good', g, '', 6],
     ['Bombay Palace', 'curry', 'Lamm Vindaloo', 17.5, 'bad', me, 'Selbst für mich viel zu scharf', 20],
     ['Ramen Ya', 'asia', 'Tonkotsu Ramen', 14.5, 'good', g, 'Brühe kommt separat, bleibt heiß', 1],
+    ['Ramen Ya', 'asia', 'Tonkotsu Ramen', 14.5, 'good', me, '', 1],
+    ['Sultan Kebab', 'doener', 'Lamm-Dürüm', 9.5, 'good', g, '', 2],
     ['Ramen Ya', 'asia', 'Gyoza (6 Stück)', 6.5, 'ok', me, '', 1],
     ['Burger Bros', 'burger', 'Smash Burger', 12.9, 'good', me, '', 15],
     ['Burger Bros', 'burger', 'Süßkartoffel-Pommes', 4.9, 'bad', me, 'Kamen komplett pappig an', 15],
@@ -1141,7 +1422,12 @@ document.addEventListener('click', ev => {
     case 'cuisine':
       ui.cuisine = el.dataset.c === ui.cuisine ? 'all' : el.dataset.c;
       renderList(true); poke($(`#cats .cbtn[data-c="${ui.cuisine}"] .ico`)); break;
-    case 'fav': { const dk = el.dataset.dish; openRestaurant(el.dataset.key, null).then(() => openDish(dk)); break; }
+    case 'roll': roll(); break;
+    case 'person': ui.person = el.dataset.p === ui.person ? null : el.dataset.p; renderList(true); break;
+    case 'open-dish': { const dk = el.dataset.dish; openRestaurant(el.dataset.key, null).then(() => openDish(dk)); break; }
+    case 'pick-who': pickWho(el.dataset.name); break;
+    case 'import-go': confirmImport(); break;
+    case 'inbox-seen': store.del(LS.inbox); el.closest('section')?.remove(); break;
     case 'pick-photo': $('#photoIn').click(); break;
     case 'drop-photo': ui.edit.st.photo = null; syncPhoto(); break;
     case 'add': { const r = ui.view === 'detail' ? currentRestaurant() : null; openEditor(r ? { restaurant: r.name, cuisine: r.cuisine } : {}); break; }
@@ -1157,7 +1443,7 @@ document.addEventListener('click', ev => {
     case 'close': closeSheet(); break;
     case 'save-name': {
       const v = $('#f-name').value.trim(); if (!v) return fieldErr('#f-name', 'Wie heißt du?');
-      user = v; store.set(LS.user, v); ui.sheetLocked = false; closeSheet(); toast(`Hallo ${v}!`); break;
+      user = v; store.set(LS.user, v); ui.sheetLocked = false; closeSheet(); rerender(); toast(`Hallo ${v}!`); break;
     }
     case 'save-settings': {
       const v = $('#f-name').value.trim(); if (!v) return fieldErr('#f-name', 'Name darf nicht leer sein');
@@ -1176,7 +1462,7 @@ document.addEventListener('click', ev => {
     }
     case 'reset':
       if (!confirm('Wirklich alle Bewertungen auf diesem Gerät löschen? Das lässt sich nicht rückgängig machen. Tipp: vorher exportieren.')) return;
-      setPhotos(new Map(entries.map(e => [e.id, null]))); entries = []; persist(); closeSheet(); ui.view = 'home'; renderHome(); toast('Alles gelöscht'); break;
+      setPhotos(new Map(entries.map(e => [e.id, null]))); entries = []; persist(); store.del(LS.inbox); ui.pick = null; closeSheet(); ui.view = 'home'; renderHome(); toast('Alles gelöscht'); break;
   }
 });
 document.addEventListener('input', ev => {
