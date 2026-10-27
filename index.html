@@ -338,6 +338,12 @@ svg{display:block;max-width:100%}
 .grab{display:block;width:100%;height:22px;margin:-4px 0 6px}
 .grab::before{content:"";display:block;width:42px;height:5px;border-radius:3px;background:var(--line);margin:8px auto 0}
 .sheet h2{margin:0 0 16px;font-size:21px}
+/* Schließen-X: klebt beim Scrollen oben rechts im Sheet (Hülle ohne Höhe, damit nichts verrutscht) */
+.sheet-top{position:sticky;top:0;height:0;z-index:5}
+.sheet-x{position:absolute;top:2px;right:-6px;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);color:var(--muted);box-shadow:0 4px 14px -4px rgba(0,0,0,.6);transition:transform .15s,color .2s}
+.sheet-x:active{transform:scale(.92)}
+.sheet-x svg{width:20px;height:20px}
+.sheet>h2,.sheet .sh-head{padding-right:46px}
 .sh-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
 .sh-head h2{margin:0}
 .field{margin-bottom:16px}
@@ -688,6 +694,7 @@ const SVG = {
   share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M7 8l5-5 5 5"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>',
   inbox: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>',
   dice: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><g fill="currentColor" stroke="none"><circle cx="8.6" cy="8.6" r="1.5"/><circle cx="15.4" cy="8.6" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="8.6" cy="15.4" r="1.5"/><circle cx="15.4" cy="15.4" r="1.5"/></g></svg>',
+  close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   camera: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg>'
 };
 const SCOOTER = `<svg viewBox="-24 0 144 72" aria-hidden="true">
@@ -1022,7 +1029,8 @@ function dishHTML(d, i) {
 /* ===================== Sheets ===================== */
 function openSheet(html, onMount) {
   const sh = $('#sheet'), bd = $('#backdrop'), wasOpen = sh.classList.contains('open');
-  sh.innerHTML = html; sh.scrollTop = 0;
+  // X zum Schließen überall – außer beim Namens-Sheet, das bewusst nicht wegklickbar ist
+  sh.innerHTML = (ui.sheetLocked ? '' : `<div class="sheet-top"><button class="sheet-x" data-act="close" aria-label="Schließen">${SVG.close}</button></div>`) + html; sh.scrollTop = 0;
   if (!wasOpen) {
     sh.hidden = false; bd.hidden = false; void sh.offsetHeight;
     sh.classList.add('open'); bd.classList.add('open'); document.body.classList.add('locked');
