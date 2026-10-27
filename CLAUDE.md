@@ -13,14 +13,16 @@ Live: https://ovestridson.github.io/Nochmal/
 - Nutzertext immer mit `esc()` in `innerHTML` einsetzen.
 
 ## Speicher
-- Nur `localStorage`, Präfix **`nochmal_`** (Domain wird mit GameRegal geteilt!). Keys: `nochmal_v1` (Daten), `nochmal_user`, `nochmal_anim`, `nochmal_accent`.
-- Lesen/Schreiben immer über `store.get/set` (try/catch).
+- **Nur lokal im Browser** – Sinn der Regel: kein Online-Speicher/Cloud-Dienst, der Geld kostet. Lokale Browser-Speicher (localStorage, IndexedDB) sind erlaubt.
+- Präfix **`nochmal`** überall (Domain wird mit GameRegal geteilt!).
+- `localStorage`: Keys `nochmal_v1` (Einträge ohne Fotos), `nochmal_user`, `nochmal_anim`, `nochmal_accent`. Lesen/Schreiben immer über `store.get/set` (try/catch).
+- `IndexedDB` „nochmal“, Store `photos`: Fotos, Schlüssel = Eintrags-id. Beim Start komplett in die Map `photos` geladen (`loadPhotos`), Zugriff über `photoOf(e)`, Schreiben über `setPhoto/setPhotos`.
 
 ## Datenmodell
 Ein Eintrag = eine Bewertung:
-`{ id, restaurant, cuisine, dish, price|null, verdict:'good'|'ok'|'bad', note, photo|null, author, createdAt, updatedAt, deleted, demo? }`
-- `photo`: JPEG-Data-URL, beim Hinzufügen per `shrinkPhoto()` auf max. 640 px / ca. 60 KB verkleinert (liegt im localStorage – Platz ist knapp!). Passt es nicht mehr, wird ohne Foto gespeichert. Beim Löschen wird das Foto entfernt.
-- Küchen (`CUISINES`): Pizza, Pasta, Burger, Döner, Asiatisch, Sushi, Indisch, Mexikanisch, Bowl & Salat, Süßes, Sonstiges – jede mit eigenem SVG-Icon + Poke-Animation.
+`{ id, restaurant, cuisine, dish, price|null, verdict:'good'|'ok'|'bad', note, author, createdAt, updatedAt, deleted, demo? }`
+- `photo` steht **nur in Exportdateien** (JPEG-Data-URL). Auf dem Gerät liegt es in der IndexedDB (siehe Speicher). `shrinkPhoto()` rechnet auf max. 1200 px / ca. 250 KB herunter. Beim Löschen eines Eintrags wird sein Foto entfernt.
+- Küchen (`CUISINES`): Pizza, Pasta, Burger, Döner, Schnitzel & Deutsch, Griechisch, Orientalisch, Hähnchen, Asiatisch, Sushi, Indisch, Mexikanisch, Bowl & Salat, Frühstück, Süßes, Sonstiges – jede mit eigenem SVG-Icon + Poke-Animation. Nur Essen, kein Non-Food.
 - `id` über `uuid()` (hat Fallback, weil `crypto.randomUUID` über http fehlt).
 - Jede Änderung setzt `updatedAt` neu.
 - **Nie hart löschen**, sondern `deleted:true` (Lösch-Markierung, sonst holt der Import den Eintrag zurück). Ausnahme: Demo-Daten.

@@ -161,6 +161,24 @@ svg{display:block;max-width:100%}
 /* Süßes: Donut dreht sich */
 .poke .sw-donut{animation:swSpin .8s cubic-bezier(.3,.7,.3,1)}
 @keyframes swSpin{to{transform:rotate(360deg)}}
+/* Schnitzel: Zitrone wird ausgedrückt */
+.sc-drop{opacity:0}
+.poke .sc-lemon{animation:scLemon 1s cubic-bezier(.3,.7,.3,1)}
+.poke .sc-drop{animation:scDrop 1s ease}
+@keyframes scLemon{0%,100%{transform:none}35%,60%{transform:translate(-3px,6px) rotate(-25deg) scale(.9,1)}}
+@keyframes scDrop{0%,40%{opacity:0;transform:none}55%{opacity:1}100%{opacity:0;transform:translateY(7px)}}
+/* Gyros & Falafel: Füllung hüpft */
+.poke .g-fill>*,.poke .f-balls>*{animation:tHop .6s cubic-bezier(.3,1.6,.5,1)}
+.poke .g-fill>*:nth-child(2),.poke .f-balls>*:nth-child(2){animation-delay:.08s}
+.poke .g-fill>*:nth-child(3),.poke .f-balls>*:nth-child(3){animation-delay:.16s}
+/* Hähnchen: Keule wackelt */
+.poke .ch-leg{animation:chWiggle .8s ease-in-out}
+@keyframes chWiggle{0%,100%{transform:none}25%{transform:rotate(-12deg)}50%{transform:rotate(10deg)}75%{transform:rotate(-5deg)}}
+/* Frühstück: Spiegelei wird gewendet */
+.poke .bf-pan{animation:bfPan .9s ease}
+.poke .bf-egg{animation:bfEgg .9s cubic-bezier(.3,1.4,.5,1)}
+@keyframes bfPan{0%,100%{transform:none}15%{transform:translateX(-3px) rotate(-3deg)}30%{transform:translateX(3px) rotate(2deg)}}
+@keyframes bfEgg{0%,25%,100%{transform:none}50%{transform:translateY(-10px) rotate(-160deg) scale(.9)}75%{transform:translateY(-2px) rotate(-360deg)}}
 /* Alle: Kacheln ploppen */
 .poke .a-sq>*{animation:pop .4s cubic-bezier(.3,1.6,.5,1) both}
 .poke .a-sq>*:nth-child(2){animation-delay:.06s}
@@ -258,6 +276,7 @@ textarea.inp{height:auto;min-height:84px;padding:12px 14px;resize:vertical;line-
 .row2{display:grid;grid-template-columns:1fr 112px;gap:10px}
 .cuisines{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:8px}
 .cbtn{--c:var(--accent);display:grid;justify-items:center;gap:6px;padding:10px 4px 8px;border-radius:16px;background:var(--surface);border:2px solid transparent;font-size:12px;font-weight:700;color:var(--muted);transition:border-color .2s,background .2s,color .2s}
+.cuisines .cbtn{padding:10px 2px 8px;text-align:center;-webkit-hyphens:auto;hyphens:auto;overflow-wrap:anywhere}
 .cbtn[aria-pressed="true"]{border-color:var(--c);color:var(--text);background:color-mix(in srgb,var(--c) 12%,var(--surface))}
 .verdicts{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .vbtn{position:relative;overflow:hidden;display:grid;justify-items:center;gap:4px;padding:14px 6px;border-radius:16px;background:var(--surface);border:2px solid transparent;color:var(--muted);font-weight:750;font-size:14px;transition:transform .15s,border-color .2s,background .2s,color .2s,box-shadow .2s}
@@ -371,11 +390,16 @@ const CUISINES = [
   { id: 'pasta',  label: 'Pasta',     c: '#ffc27a' },
   { id: 'burger', label: 'Burger',    c: '#f2a65a' },
   { id: 'doener', label: 'Döner',     c: '#c9a27e' },
+  { id: 'schnitzel', label: 'Schnitzel & Deutsch', c: '#ffcf8a' },
+  { id: 'greek',  label: 'Griechisch', c: '#7fb2ff' },
+  { id: 'orient', label: 'Orientalisch', c: '#e0a07a' },
+  { id: 'chicken', label: 'Hähnchen', c: '#ffad8a' },
   { id: 'asia',   label: 'Asiatisch', c: '#6fd0f0' },
   { id: 'sushi',  label: 'Sushi',     c: '#f59ac5' },
   { id: 'curry',  label: 'Indisch',   c: '#f5cf4a' },
   { id: 'taco',   label: 'Mexikanisch', c: '#ff9466' },
   { id: 'bowl',   label: 'Bowl & Salat', c: '#7fd6c2' },
+  { id: 'breakfast', label: 'Frühstück', c: '#ffe48a' },
   { id: 'sweet',  label: 'Süßes',     c: '#e7a5ff' },
   { id: 'other',  label: 'Sonstiges', c: '#b69cff' }
 ];
@@ -391,9 +415,7 @@ const PRESETS = [
 let accent = store.get(LS.accent, PRESETS[0].hex);
 const ui = { view: 'home', rKey: null, q: '', cuisine: 'all', fresh: new Set(), homeScroll: 0, edit: null, dishCtx: null, sheetLocked: false };
 
-const save = () => store.set(LS.data, { v: 1, entries });
-const SAVE_FAIL = 'Speichern fehlgeschlagen – Speicher voll oder gesperrt?';
-const persist = () => { if (!save()) toast(SAVE_FAIL); };
+const persist = () => { if (!store.set(LS.data, { v: 1, entries })) toast('Speichern fehlgeschlagen – Speicher voll oder gesperrt?'); };
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const norm = s => String(s ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss').replace(/\s+/g, ' ').trim();
 const slug = s => norm(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'eintrag';
@@ -538,6 +560,43 @@ const ICONS = {
       <circle cx="32" cy="33" r="6.5" stroke="#b9743a" stroke-width="1.5" style="fill:color-mix(in srgb,var(--c) 18%,var(--surface2))"/>
       <g stroke-width="2" stroke-linecap="round"><path d="M22 26 l3 -1.5" stroke="#fff4dc"/><path d="M40 22 l2.5 2" stroke="#6fd0f0"/><path d="M44 36 l-1 3" stroke="#ffc83d"/><path d="M24 40 l3 1.5" stroke="#8b8cff"/><path d="M33 45 l3 -1" stroke="#fff4dc"/><path d="M30 21 l2.6 1" stroke="#7cc95a"/></g></g>
   </svg>`,
+  schnitzel: () => `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <ellipse cx="32" cy="45" rx="27" ry="9" fill="#ece6f2"/>
+    <path d="M10 40 Q9 30 20 27 Q30 22 42 26 Q55 28 53 38 Q52 46 38 47 Q20 49 10 40Z" fill="#c9792f"/>
+    <path d="M13 38 Q13 31 22 29 Q31 25 41 28 Q51 30 50 37 Q49 43 37 44 Q21 46 13 38Z" fill="#e3a14a"/>
+    <g fill="#b8682a"><circle cx="22" cy="34" r="1.2"/><circle cx="30" cy="31" r="1"/><circle cx="38" cy="38" r="1.2"/><circle cx="44" cy="33" r="1"/><circle cx="27" cy="40" r="1"/></g>
+    <g class="sc-drop" fill="#fff6b0"><circle cx="43" cy="28" r="1.5"/><circle cx="39" cy="31" r="1.1"/></g>
+    <g class="sc-lemon"><circle cx="48" cy="18" r="8" fill="#ffe14d"/><circle cx="48" cy="18" r="6" fill="#fff3a6"/><path d="M48 12 V24 M42 18 H54 M43.8 13.8 L52.2 22.2 M52.2 13.8 L43.8 22.2" stroke="#ffe14d" stroke-width="1.2"/></g>
+  </svg>`,
+  greek: () => `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <g class="g-fill"><path d="M17 25 q3 -8 8 -4 q4 -7 8 -2 q5 -6 9 0 q4 -4 7 4Z" fill="#7cc95a"/>
+      <g fill="#e0533f"><circle cx="24" cy="21" r="2.8"/><circle cx="39" cy="20" r="2.8"/></g>
+      <path d="M27 19 q5 -6 10 0 q-5 3 -10 0Z" fill="#fbf7f0"/></g>
+    <path d="M15 24 Q32 31 49 24 L36 57 Q32 61 28 57Z" fill="#f0d39a"/>
+    <path d="M22 30 L42 30 L40 35 L24 35Z" fill="#a0522d"/>
+    <path d="M20 39 Q32 44 44 39 L36 57 Q32 61 28 57Z" style="fill:var(--c)"/>
+    <path d="M22 43 Q32 47 42 43" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1.5"/>
+  </svg>`,
+  orient: () => `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <ellipse cx="32" cy="46" rx="26" ry="8" fill="#ece6f2"/><ellipse cx="32" cy="44.5" rx="20" ry="5.5" fill="#f1dcae"/>
+    <path d="M20 45 q12 -5 24 0" fill="none" stroke="#d9bd84" stroke-width="1.6"/>
+    <g class="f-balls"><g><circle cx="21" cy="38" r="7" fill="#8a5a2b"/><circle cx="19" cy="36" r="2" fill="#b07a3e"/></g>
+      <g><circle cx="43" cy="38" r="7" fill="#7a4e24"/><circle cx="41" cy="36" r="2" fill="#a9733a"/></g>
+      <g><circle cx="32" cy="31" r="7.5" fill="#94622f"/><circle cx="30" cy="29" r="2.2" fill="#bb8444"/></g></g>
+    <path d="M46 25 q4 -6 9 -3 q-4 5 -9 3Z" fill="#6fcf5b"/>
+  </svg>`,
+  chicken: () => `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <g class="ch-leg"><path d="M33 39 L46 50" stroke="#f4efe9" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="48" cy="48" r="3.4" fill="#f4efe9"/><circle cx="45" cy="52" r="3.4" fill="#f4efe9"/>
+      <path d="M14 30 Q12 16 26 13 Q40 11 42 24 Q43 33 36 38 L30 42 Q20 46 15 38Z" fill="#d98a3a"/>
+      <path d="M18 28 Q18 19 27 17" fill="none" stroke="rgba(255,230,180,.55)" stroke-width="3" stroke-linecap="round"/>
+      <g fill="#b86a24"><circle cx="30" cy="24" r="1.2"/><circle cx="24" cy="33" r="1.1"/><circle cx="35" cy="31" r="1"/></g></g>
+  </svg>`,
+  breakfast: () => `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <g class="bf-pan"><path d="M44 42 L59 52" stroke="#8d8599" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="28" cy="33" r="22" fill="#8d8599"/><circle cx="28" cy="33" r="19" fill="#2b2533"/>
+      <g class="bf-egg"><path d="M15 33 Q14 22 25 21 Q36 19 39 29 Q41 41 29 44 Q16 45 15 33Z" fill="#fbf7f0"/><circle cx="27" cy="32" r="6" fill="#ffb627"/><circle cx="25" cy="30" r="1.8" fill="#ffe08a"/></g></g>
+  </svg>`,
   all: () => `<svg viewBox="0 0 64 64" aria-hidden="true"><g class="a-sq" style="fill:var(--c)">
     <rect x="12" y="12" width="17" height="17" rx="5"/><rect x="35" y="12" width="17" height="17" rx="5" opacity=".7"/><rect x="12" y="35" width="17" height="17" rx="5" opacity=".7"/><rect x="35" y="35" width="17" height="17" rx="5" opacity=".45"/></g></svg>`
 };
@@ -577,6 +636,38 @@ const SCOOTER = `<svg viewBox="-24 0 144 72" aria-hidden="true">
   <g class="wheel"><circle cx="88" cy="57" r="9" fill="#2b2533" stroke="#e7e2ee" stroke-width="3"/><path d="M88 50 V64 M81 57 H95" stroke="#8d8599" stroke-width="2"/></g>
 </svg>`;
 
+/* ===================== Fotos (IndexedDB) ===================== */
+// Fotos sind zu groß für localStorage → eigene IndexedDB „nochmal“ (bleibt lokal auf dem Gerät, kostet nichts).
+// Schlüssel = Eintrags-id, Wert = JPEG-Data-URL. Beim Start einmal komplett in `photos` geladen, damit das Rendern synchron bleibt.
+const photos = new Map();
+let idbP = null;
+const idb = () => idbP || (idbP = new Promise((res, rej) => {
+  const r = indexedDB.open('nochmal', 1);
+  r.onupgradeneeded = () => r.result.createObjectStore('photos');
+  r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+}));
+async function idbRun(mode, fn) {
+  const db = await idb();
+  return new Promise((res, rej) => { const tx = db.transaction('photos', mode); fn(tx.objectStore('photos')); tx.oncomplete = () => res(true); tx.onerror = tx.onabort = () => rej(tx.error); });
+}
+async function loadPhotos() {
+  try { await idbRun('readonly', st => { const c = st.openCursor(); c.onsuccess = () => { const cur = c.result; if (cur) { photos.set(cur.key, cur.value); cur.continue(); } }; }); } catch (e) {}
+}
+// Map sofort aktualisieren (für die Anzeige), IndexedDB im Hintergrund. Liefert false, wenn das Speichern scheitert.
+function setPhotos(map) {
+  for (const [id, p] of map) if (p) photos.set(id, p); else photos.delete(id);
+  if (!map.size) return Promise.resolve(true);
+  return idbRun('readwrite', st => { for (const [id, p] of map) if (p) st.put(p, id); else st.delete(id); }).catch(() => false);
+}
+const setPhoto = (id, p) => setPhotos(new Map([[id, p]]));
+const photoOf = e => photos.get(e.id) || null;
+// Fotos aus der ersten Foto-Version lagen noch im localStorage → umziehen
+async function migratePhotos() {
+  const old = entries.filter(e => 'photo' in e);
+  if (!old.length) return;
+  if (await setPhotos(new Map(old.filter(e => e.photo).map(e => [e.id, e.photo])))) { old.forEach(e => { delete e.photo; }); persist(); }
+}
+
 /* ===================== Daten ableiten ===================== */
 const live = () => entries.filter(e => !e.deleted);
 function groupDishes(es) {
@@ -587,7 +678,7 @@ function groupDishes(es) {
     d.name = d.entries[0].dish;
     d.price = d.entries.find(e => e.price != null)?.price ?? null;
     d.note = d.entries.find(e => e.note)?.note || '';
-    d.photos = d.entries.filter(e => e.photo).map(e => e.photo); d.photo = d.photos[0] || null;
+    d.photos = d.entries.map(photoOf).filter(Boolean); d.photo = d.photos[0] || null;
     const by = new Map(); for (const e of d.entries) if (!by.has(e.author)) by.set(e.author, e);
     d.byAuthor = [...by.values()];
     const vs = new Set(d.byAuthor.map(e => e.verdict));
@@ -602,7 +693,7 @@ function groupRestaurants() {
   return [...map.values()].map(r => {
     r.entries.sort((a, b) => b.createdAt - a.createdAt);
     r.name = r.entries[0].restaurant; r.cuisine = r.entries[0].cuisine;
-    r.photo = r.entries.find(e => e.photo)?.photo || null;
+    r.photo = r.entries.map(photoOf).find(Boolean) || null;
     r.last = Math.max(...r.entries.map(e => e.updatedAt));
     r.dishes = groupDishes(r.entries);
     r.tally = { good: 0, mixed: 0, ok: 0, bad: 0 }; r.dishes.forEach(d => r.tally[d.status]++);
@@ -753,13 +844,15 @@ function openSettings() {
     </div><p class="hint">Grün, Gelb und Rot sind für die Ampel reserviert. Eine Akzentfarbe in diesen Tönen macht das Urteil schwerer lesbar.</p></div>
     <div class="set-group"><span class="lbl">Teilen & Sichern</span><div class="btns"><button class="btn ghost" data-act="export-all">${SVG.share} Alles exportieren</button><button class="btn ghost" data-act="import">${SVG.inbox} Datei importieren</button></div><p class="hint">Die Datei kannst du per Telegram schicken. Beim Import wird zusammengeführt – nichts landet doppelt, die neuere Version gewinnt.</p></div>
     <div class="set-group"><label class="toggle"><span><b>Animationen</b><small>Stempel, Roller & Co.</small></span><input type="checkbox" id="f-anim" ${animPref ? 'checked' : ''}><span class="sw"></span></label></div>
-    <div class="set-group"><span class="lbl">Daten</span><div class="btns">${hasDemo() ? '<button class="btn ghost" data-act="remove-demo">Demo-Daten entfernen</button>' : live().length ? '' : '<button class="btn ghost" data-act="demo">Demo-Daten laden</button>'}<button class="btn danger" data-act="reset">Alle Daten auf diesem Gerät löschen</button></div><p class="hint">Alles bleibt nur auf diesem Gerät. Exportiere ab und zu als Backup. ${storageInfo()}</p></div>
-    <div class="btns"><button class="btn primary" data-act="save-settings">Fertig</button></div>`);
+    <div class="set-group"><span class="lbl">Daten</span><div class="btns">${hasDemo() ? '<button class="btn ghost" data-act="remove-demo">Demo-Daten entfernen</button>' : live().length ? '' : '<button class="btn ghost" data-act="demo">Demo-Daten laden</button>'}<button class="btn danger" data-act="reset">Alle Daten auf diesem Gerät löschen</button></div><p class="hint">Alles bleibt nur auf diesem Gerät. Exportiere ab und zu als Backup. <span id="storage"></span></p></div>
+    <div class="btns"><button class="btn primary" data-act="save-settings">Fertig</button></div>`, showStorage);
 }
-function storageInfo() {
-  let n = 0; try { n = (localStorage.getItem(LS.data) || '').length; } catch (e) {}
-  const pics = live().filter(e => e.photo).length;
-  return `Belegt: ca. ${(n / 1e6).toLocaleString('de-DE', { maximumFractionDigits: 1, minimumFractionDigits: 1 })} MB${pics ? ` (${pics} Foto${pics === 1 ? '' : 's'})` : ''} – der Browser erlaubt nur ein paar MB.`;
+// Speicherbedarf nachträglich ins Einstellungs-Sheet schreiben (estimate ist async)
+async function showStorage() {
+  const n = live().filter(photoOf).length;
+  let txt = `${n} Foto${n === 1 ? '' : 's'}`;
+  try { const { usage } = await navigator.storage.estimate(); txt += ` · belegt ca. ${(usage / 1e6).toLocaleString('de-DE', { maximumFractionDigits: 1 })} MB`; } catch (e) {}
+  const el = $('#storage'); if (el) el.textContent = txt + '.';
 }
 function openDish(dKey) {
   const r = currentRestaurant(); if (!r) return;
@@ -778,7 +871,7 @@ function openEditor({ id = null, restaurant = '', cuisine = null, dish = '' } = 
   const rs = groupRestaurants();
   const rName = e ? e.restaurant : restaurant;
   const match = rs.find(r => r.key === norm(rName));
-  ui.edit = { id, st: { verdict: e ? e.verdict : null, cuisine: e ? e.cuisine : (cuisine || match?.cuisine || 'other'), photo: e ? e.photo || null : null } };
+  ui.edit = { id, st: { verdict: e ? e.verdict : null, cuisine: e ? e.cuisine : (cuisine || match?.cuisine || 'other'), photo: e ? photoOf(e) : null } };
   const st = ui.edit.st;
   openSheet(`<button class="grab" data-act="close" aria-label="Schließen"></button><h2>${e ? 'Eintrag ändern' : 'Wie war’s?'}</h2>
     <div class="field"><label for="f-r">Restaurant</label><input class="inp" id="f-r" list="dl-r" value="${esc(rName)}" placeholder="z. B. Sultan Kebab" autocomplete="off" autocapitalize="words" enterkeyhint="next"><datalist id="dl-r">${rs.map(r => `<option value="${esc(r.name)}">`).join('')}</datalist></div>
@@ -795,17 +888,17 @@ const photoSlotHTML = p => p
   ? `<div class="pslot has"><img src="${esc(p)}" alt="Foto vom Gericht"><div class="pacts"><button type="button" class="mini-btn" data-act="pick-photo">Ändern</button><button type="button" class="mini-btn" data-act="drop-photo">Entfernen</button></div></div>`
   : `<button type="button" class="pslot" data-act="pick-photo">${SVG.camera}Foto hinzufügen</button>`;
 const syncPhoto = () => { const s = $('#photo-slot'); if (s) s.innerHTML = photoSlotHTML(ui.edit.st.photo); };
-// Fotos landen als JPEG-Data-URL im localStorage → klein rechnen, sonst ist der Speicher nach ein paar Bildern voll
+// Handyfotos sind mehrere MB groß → auf Bildschirmgröße rechnen (scharf auf dem iPhone, Exportdatei bleibt handlich)
 async function shrinkPhoto(file) {
   const url = URL.createObjectURL(file);
   try {
     const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
-    const k = Math.min(1, 640 / Math.max(img.naturalWidth, img.naturalHeight));
+    const k = Math.min(1, 1200 / Math.max(img.naturalWidth, img.naturalHeight));
     const cv = document.createElement('canvas');
     cv.width = Math.round(img.naturalWidth * k); cv.height = Math.round(img.naturalHeight * k);
     cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
-    let q = 0.62, out = cv.toDataURL('image/jpeg', q);
-    while (out.length > 60000 && q > 0.35) { q -= 0.08; out = cv.toDataURL('image/jpeg', q); }
+    let q = 0.8, out = cv.toDataURL('image/jpeg', q);
+    while (out.length > 350000 && q > 0.45) { q -= 0.1; out = cv.toDataURL('image/jpeg', q); }
     return out;
   } finally { URL.revokeObjectURL(url); }
 }
@@ -851,15 +944,16 @@ function saveEntry() {
   const now = Date.now(), photo = st.photo || null; let id;
   if (isEdit) {
     const e = entries.find(x => x.id === ui.edit.id);
-    Object.assign(e, { restaurant: rName, cuisine: st.cuisine, dish, price, verdict: st.verdict, note, photo, updatedAt: now }); id = e.id;
+    Object.assign(e, { restaurant: rName, cuisine: st.cuisine, dish, price, verdict: st.verdict, note, updatedAt: now }); id = e.id;
   } else {
     id = uuid();
-    entries.push({ id, restaurant: rName, cuisine: st.cuisine, dish, price, verdict: st.verdict, note, photo, author: user, createdAt: now, updatedAt: now, deleted: false });
+    entries.push({ id, restaurant: rName, cuisine: st.cuisine, dish, price, verdict: st.verdict, note, author: user, createdAt: now, updatedAt: now, deleted: false });
   }
-  // Speicher voll? Dann lieber ohne Foto speichern als gar nicht
-  let ok = save(), photoLost = false;
-  if (!ok && photo) { entries.find(x => x.id === id).photo = null; photoLost = true; ok = save(); }
-  closeSheet();
+  if (photo !== (photos.get(id) || null)) {
+    setPhoto(id, photo).then(ok => { if (!ok) toast('Foto konnte nicht gespeichert werden'); });
+    if (photo) try { navigator.storage?.persist?.(); } catch (e) {} // bittet den Browser, die Fotos nicht aufzuräumen
+  }
+  persist(); closeSheet();
   ui.fresh = new Set([id]); setTimeout(() => ui.fresh.clear(), 4000);
   const verdict = st.verdict, rKey = norm(rName), dKey = norm(dish);
   const after = () => {
@@ -868,8 +962,8 @@ function saveEntry() {
       row.scrollIntoView({ block: 'center', behavior: animOn() ? 'smooth' : 'auto' });
       if (verdict === 'bad' && animOn()) { const s = row.querySelector('.stamp'); if (s) restart(s, 'slam'); restart(row, 'thud'); }
     }
-    if (!isEdit && ok) scooter('ltr', 'Geliefert!');
-    toast(!ok ? SAVE_FAIL : photoLost ? 'Gespeichert – aber kein Platz mehr fürs Foto' : isEdit ? 'Änderung gespeichert' : 'Gespeichert');
+    if (!isEdit) scooter('ltr', 'Geliefert!');
+    toast(isEdit ? 'Änderung gespeichert' : 'Gespeichert');
   };
   if (ui.view === 'detail' && ui.rKey === rKey) { renderDetail(); setTimeout(after, 60); }
   else openRestaurant(rKey, null, { noStagger: true }).then(after);
@@ -877,14 +971,16 @@ function saveEntry() {
 function deleteEntry() {
   const e = entries.find(x => x.id === ui.edit.id); if (!e) return;
   if (!confirm('Diesen Eintrag löschen?')) return;
-  e.deleted = true; e.photo = null; e.updatedAt = Date.now(); // Lösch-Markierung, damit der Import ihn nicht zurückholt; Foto weg, spart Platz
+  e.deleted = true; e.updatedAt = Date.now(); // Lösch-Markierung, damit der Import ihn nicht zurückholt
+  setPhoto(e.id, null);
   persist(); closeSheet(); rerender(); toast('Gelöscht');
 }
 
 /* ===================== Teilen / Import ===================== */
 function payload(list, header) {
   // v2: Einträge können ein Foto (photo) haben – alte v1-Dateien bleiben lesbar
-  const json = JSON.stringify({ app: 'nochmal', v: 2, from: user, exportedAt: Date.now(), entries: list });
+  const withPhotos = list.map(e => photos.has(e.id) ? { ...e, photo: photos.get(e.id) } : e);
+  const json = JSON.stringify({ app: 'nochmal', v: 2, from: user, exportedAt: Date.now(), entries: withPhotos });
   return `${header}\n\nIn „Nochmal?“ öffnen: Einstellungen → Datei importieren.\n---\n${json}`;
 }
 async function shareFile(name, text, title) {
@@ -928,18 +1024,22 @@ function clean(x) {
   return { id: x.id.slice(0, 64), restaurant, cuisine: CMAP[x.cuisine] ? x.cuisine : 'other', dish,
     price: typeof x.price === 'number' && isFinite(x.price) ? Math.round(x.price * 100) / 100 : null,
     verdict: x.verdict, note: s(x.note, 500),
-    photo: typeof x.photo === 'string' && x.photo.length < 300000 && /^data:image\/(jpeg|png|webp);base64,[a-z0-9+/]+=*$/i.test(x.photo) ? x.photo : null,
+    photo: typeof x.photo === 'string' && x.photo.length < 1500000 && /^data:image\/(jpeg|png|webp);base64,[a-z0-9+/]+=*$/i.test(x.photo) ? x.photo : null,
     author: s(x.author, 24) || 'Unbekannt',
     createdAt: num(x.createdAt), updatedAt: num(x.updatedAt), deleted: !!x.deleted };
 }
 function merge(list) {
-  const byId = new Map(entries.map(e => [e.id, e])); let added = 0, updated = 0; const fresh = new Set();
+  const byId = new Map(entries.map(e => [e.id, e])); let added = 0, updated = 0; const fresh = new Set(), pics = new Map();
   for (const raw of list) {
-    const x = clean(raw); if (!x) continue;
+    const c = clean(raw); if (!c) continue;
+    const { photo, ...x } = c; // Foto gehört in die IndexedDB, nicht in den Eintrag
     const ex = byId.get(x.id);
     if (!ex) { entries.push(x); byId.set(x.id, x); if (!x.deleted) { added++; fresh.add(x.id); } }
     else if (x.updatedAt > ex.updatedAt) { Object.assign(ex, x); updated++; if (!x.deleted) fresh.add(x.id); }
+    else continue;
+    if (photo || photos.has(x.id)) pics.set(x.id, x.deleted ? null : photo);
   }
+  if (pics.size) setPhotos(pics).then(ok => { if (!ok) toast('Fotos konnten nicht gespeichert werden'); });
   if (added || updated) persist();
   return { added, updated, fresh };
 }
@@ -993,6 +1093,8 @@ const DEMO_ROWS = [
     ['Taco Loco', 'taco', 'Birria Tacos', 12.9, 'good', g, 'Die Brühe zum Dippen!', 7],
     ['Taco Loco', 'taco', 'Nachos Supreme', 9.5, 'bad', me, 'Matschig angekommen', 7],
     ['Green Bowl', 'bowl', 'Poke Bowl Lachs', 13.9, 'good', me, '', 10],
+    ['Gasthaus Krone', 'schnitzel', 'Wiener Schnitzel', 16.9, 'good', me, 'Kam tatsächlich knusprig an', 13],
+    ['Gasthaus Krone', 'schnitzel', 'Jägerschnitzel', 15.5, 'ok', g, 'Soße extra wäre besser', 13],
     ['Sweet Spot', 'sweet', 'Zimtschnecken (4er)', 8.5, 'good', g, '', 11]
 ];
 function demo() {
@@ -1004,7 +1106,7 @@ function demo() {
   persist();
 }
 const hasDemo = () => entries.some(e => e.demo);
-function removeDemo() { entries = entries.filter(e => !e.demo); persist(); }
+function removeDemo() { setPhotos(new Map(entries.filter(e => e.demo).map(e => [e.id, null]))); entries = entries.filter(e => !e.demo); persist(); }
 // Demo-Daten aus der allerersten Version hatten noch keine Markierung → an Restaurant+Gericht+Preis+Notiz erkennen
 function migrateLegacyDemo() {
   const sig = new Set(DEMO_ROWS.map(r => `${r[0]}|${r[2]}|${r[3]}|${r[6]}`));
@@ -1074,7 +1176,7 @@ document.addEventListener('click', ev => {
     }
     case 'reset':
       if (!confirm('Wirklich alle Bewertungen auf diesem Gerät löschen? Das lässt sich nicht rückgängig machen. Tipp: vorher exportieren.')) return;
-      entries = []; persist(); closeSheet(); ui.view = 'home'; renderHome(); toast('Alles gelöscht'); break;
+      setPhotos(new Map(entries.map(e => [e.id, null]))); entries = []; persist(); closeSheet(); ui.view = 'home'; renderHome(); toast('Alles gelöscht'); break;
   }
 });
 document.addEventListener('input', ev => {
@@ -1099,6 +1201,7 @@ applyTheme();
 migrateLegacyDemo();
 renderHome({ stagger: true });
 if (!user) openNameSheet();
+loadPhotos().then(migratePhotos).then(() => { if (photos.size) rerender(); });
 })();
 </script>
 </body>
