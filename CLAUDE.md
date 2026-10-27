@@ -18,7 +18,9 @@ Live: https://ovestridson.github.io/Nochmal/
 
 ## Datenmodell
 Ein Eintrag = eine Bewertung:
-`{ id, restaurant, cuisine, dish, price|null, verdict:'good'|'ok'|'bad', note, author, createdAt, updatedAt, deleted, demo? }`
+`{ id, restaurant, cuisine, dish, price|null, verdict:'good'|'ok'|'bad', note, photo|null, author, createdAt, updatedAt, deleted, demo? }`
+- `photo`: JPEG-Data-URL, beim Hinzufügen per `shrinkPhoto()` auf max. 640 px / ca. 60 KB verkleinert (liegt im localStorage – Platz ist knapp!). Passt es nicht mehr, wird ohne Foto gespeichert. Beim Löschen wird das Foto entfernt.
+- Küchen (`CUISINES`): Pizza, Pasta, Burger, Döner, Asiatisch, Sushi, Indisch, Mexikanisch, Bowl & Salat, Süßes, Sonstiges – jede mit eigenem SVG-Icon + Poke-Animation.
 - `id` über `uuid()` (hat Fallback, weil `crypto.randomUUID` über http fehlt).
 - Jede Änderung setzt `updatedAt` neu.
 - **Nie hart löschen**, sondern `deleted:true` (Lösch-Markierung, sonst holt der Import den Eintrag zurück). Ausnahme: Demo-Daten.
@@ -28,7 +30,7 @@ Ein Eintrag = eine Bewertung:
 - `demo:true`: wird nie exportiert, geteilt oder importiert; „Demo-Daten entfernen“ löscht nur diese.
 
 ## Teilen & Import
-- Format (`.txt`): lesbare Kopfzeilen, dann `\n---\n`, dann JSON `{ app:'nochmal', v:1, from, exportedAt, entries }`.
+- Format (`.txt`): lesbare Kopfzeilen, dann `\n---\n`, dann JSON `{ app:'nochmal', v:2, from, exportedAt, entries }` (v2: Fotos werden mitgeschickt).
 - Senden über `navigator.share({files})`, sonst Download. Gedacht für Telegram.
 - Import = Zusammenführen über `id`: neu → hinzufügen, bekannt → neueres `updatedAt` gewinnt. Nichts doppelt.
 - Formatänderungen nur abwärtskompatibel (`v` hochzählen, alte Dateien weiter lesbar).
