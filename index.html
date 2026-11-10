@@ -127,12 +127,63 @@ svg{display:block;max-width:100%}
 .pchip{padding:0 12px 0 5px}
 .pchip .av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:rgba(var(--accent-rgb),.2);color:var(--accent);font-size:14px;font-weight:900}
 .pchip .n{color:var(--good);font-size:13px;font-weight:800}
+.pchip .av svg{width:18px;height:18px}
 #f-a{margin-top:10px}
 .plist{display:grid;gap:8px}
 @media (min-width:620px){.plist{grid-template-columns:1fr 1fr}}
 .prow{display:flex;align-items:center;gap:12px;width:100%;min-width:0;padding:12px;border-radius:16px;background:var(--surface);border:1px solid rgba(74,222,128,.22);text-align:left;transition:transform .15s}
 .prow:active{transform:scale(.98)}
 .prow .pimg{flex:none;width:54px;height:54px;border-radius:17px;object-fit:cover}
+
+/* ---------- Gäste (Host) ---------- */
+.gbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gbtns .btn{min-height:54px;padding:8px 10px;font-size:14px;line-height:1.2;text-align:center}
+.vote.guest{box-shadow:inset 0 0 0 1px currentColor;background:transparent}
+.ev-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.ev-list:empty{display:none}
+.ev-add{display:flex;gap:8px}
+.ev-add .inp{flex:1;min-width:0}
+.ev-add .iconbtn{flex:none;width:50px;height:50px;font-size:26px;font-weight:600;color:var(--accent)}
+#ev-known .lbl{margin-top:14px}
+.ev-link{margin:0 0 14px;padding:12px 14px;border-radius:14px;background:var(--surface);border:1px dashed var(--line);font-size:13px;color:var(--muted);word-break:break-all;max-height:84px;overflow:hidden}
+
+/* ---------- Gast-Modus ---------- */
+body.guest .fab{display:none}
+body.guest .app{padding-bottom:0}
+.g-head{display:flex;align-items:center;gap:14px;margin:2px 0 14px}
+.g-head h1{margin:0;font-size:23px;line-height:1.15;letter-spacing:-.01em;overflow-wrap:anywhere}
+.g-head p{margin:3px 0 0;color:var(--muted);font-size:14px;overflow-wrap:anywhere}
+.g-name{margin-bottom:12px}
+.g-dishes{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+.g-dish{position:relative;padding:8px 12px 12px;border-radius:18px;background:var(--surface);border:1px solid var(--line);transition:border-color .2s}
+.g-dish.good{border-color:rgba(74,222,128,.45)}.g-dish.ok{border-color:rgba(251,191,36,.45)}.g-dish.bad{border-color:rgba(251,113,133,.45)}
+.g-top{display:flex;align-items:baseline;gap:8px;width:100%;min-height:30px;margin-bottom:6px;padding:2px;text-align:left;cursor:default}
+.g-top b{flex:1;min-width:0;font-size:16px;overflow-wrap:anywhere}
+.g-top small{max-width:55%;color:var(--muted);font-size:12.5px;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-vs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.gv{position:relative;display:flex;align-items:center;justify-content:center;gap:4px;min-height:48px;padding:0 2px;border-radius:14px;background:var(--surface2);border:2px solid transparent;color:var(--muted);font-size:13.5px;font-weight:800;white-space:nowrap;transition:transform .15s,border-color .2s,background .2s,color .2s}
+.gv .sym{font-size:18px;font-weight:900;line-height:1}
+.gv:active{transform:scale(.95)}
+.gv.good[aria-pressed="true"]{border-color:var(--good);background:var(--good-bg);color:var(--good)}
+.gv.ok[aria-pressed="true"]{border-color:var(--ok);background:var(--ok-bg);color:var(--ok)}
+.gv.bad[aria-pressed="true"]{border-color:var(--bad);background:var(--bad-bg);color:var(--bad)}
+.gv.shrug{animation:shrug .6s ease}
+.g-more{display:flex;gap:6px;overflow-x:auto;margin:10px -12px 0;padding:0 12px;scrollbar-width:none}
+.g-more::-webkit-scrollbar{display:none}
+.g-chip{flex:none;min-height:44px;padding:0 13px;border-radius:999px;background:var(--surface2);border:2px solid transparent;color:var(--muted);font-size:13.5px;font-weight:750;transition:border-color .2s,color .2s}
+.g-chip[aria-pressed="true"]{border-color:var(--accent);color:var(--text)}
+.g-free{margin-top:8px;height:46px}
+.g-hint{margin:12px 2px 0;font-size:12.5px;color:var(--muted);text-align:center}
+.g-send{position:sticky;bottom:0;z-index:4;margin:6px -16px 0;padding:10px 16px calc(env(safe-area-inset-bottom) + 12px);background:linear-gradient(transparent,var(--bg) 26%)}
+.g-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.g-btns.one{grid-template-columns:1fr}
+.g-btns .btn{line-height:1.2;text-align:center}
+.g-need{margin:0;min-height:54px;display:grid;place-items:center;padding:8px 14px;border-radius:16px;border:1px dashed var(--line);color:var(--muted);font-weight:750;text-align:center}
+.g-thanks{margin:0 0 10px;text-align:center;font-weight:800;font-size:17px;animation:pop .35s cubic-bezier(.3,1.6,.5,1)}
+.g-manual{width:100%;min-height:120px;font-size:16px}
+.burst{position:absolute;left:50%;top:50%;z-index:3;pointer-events:none;font-size:15px;line-height:1;color:var(--good);animation:burst .85s cubic-bezier(.2,.7,.3,1) forwards}
+.burst.cf{width:7px;height:7px;border-radius:2px;background:rgba(var(--accent-rgb),.95)}
+@keyframes burst{0%{opacity:1;transform:translate(-50%,-50%) scale(.4)}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.1) rotate(var(--r))}}
 
 /* ---------- Leerer Zustand ---------- */
 .empty .art{width:min(100%,300px);margin-bottom:-4px}
@@ -453,7 +504,9 @@ html.theming *{transition:background-color .35s,border-color .35s,color .35s,box
 
 /* ===================== Grundlagen ===================== */
 const $ = (s, r = document) => r.querySelector(s);
-const LS = { data: 'nochmal_v1', user: 'nochmal_user', anim: 'nochmal_anim', accent: 'nochmal_accent', inbox: 'nochmal_inbox', alias: 'nochmal_alias' };
+const LS = { data: 'nochmal_v1', user: 'nochmal_user', anim: 'nochmal_anim', accent: 'nochmal_accent', inbox: 'nochmal_inbox', alias: 'nochmal_alias', evenings: 'nochmal_evenings', guest: 'nochmal_gastname' };
+// Gast-Modus (Link #gast=…): außer nochmal_gastname wird nichts gelesen oder geschrieben – auch keine IndexedDB
+const GUEST = location.hash.startsWith('#gast=');
 const store = {
   get(k, f) { try { const v = localStorage.getItem(k); return v == null ? f : JSON.parse(v); } catch (e) { return f; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } },
@@ -486,15 +539,15 @@ const CUISINES = [
 ];
 const CMAP = Object.fromEntries(CUISINES.map(c => [c.id, c]));
 
-let entries = (() => { const d = store.get(LS.data, null); return d && Array.isArray(d.entries) ? d.entries : []; })();
-let user = store.get(LS.user, '');
-let animPref = store.get(LS.anim, true);
+let entries = GUEST ? [] : (() => { const d = store.get(LS.data, null); return d && Array.isArray(d.entries) ? d.entries : []; })();
+let user = GUEST ? '' : store.get(LS.user, '');
+let animPref = GUEST ? true : store.get(LS.anim, true);
 const PRESETS = [
   { name: 'Blau', hex: '#6ea8ff' }, { name: 'Indigo', hex: '#8b8cff' }, { name: 'Lila', hex: '#b69cff' },
   { name: 'Türkis', hex: '#4fd1c5' }, { name: 'Rosé', hex: '#f49ac1' }
 ];
-let accent = store.get(LS.accent, PRESETS[0].hex);
-const ui = { view: 'home', rKey: null, q: '', cuisine: 'all', fresh: new Set(), homeScroll: 0, edit: null, dishCtx: null, sheetLocked: false, pick: null, rollT: 0, person: null, importData: null };
+let accent = GUEST ? PRESETS[0].hex : store.get(LS.accent, PRESETS[0].hex);
+const ui = { view: 'home', rKey: null, q: '', cuisine: 'all', fresh: new Set(), homeScroll: 0, edit: null, dishCtx: null, sheetLocked: false, pick: null, rollT: 0, person: null, importData: null, ev: null, evLink: null };
 
 const persist = () => { if (!store.set(LS.data, { v: 1, entries })) toast('Speichern fehlgeschlagen – Speicher voll oder gesperrt?'); };
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -693,6 +746,9 @@ const SVG = {
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
   share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M7 8l5-5 5 5"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>',
   inbox: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>',
+  users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.8"/><path d="M16.5 14.6c2.6.2 4.4 1.9 5 5"/></svg>',
+  paste: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4.5" width="14" height="17" rx="2.5"/><path d="M9 4.5v-1a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1M9 11h6M9 15h4"/></svg>',
+  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>',
   dice: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><g fill="currentColor" stroke="none"><circle cx="8.6" cy="8.6" r="1.5"/><circle cx="15.4" cy="8.6" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="8.6" cy="15.4" r="1.5"/><circle cx="15.4" cy="15.4" r="1.5"/></g></svg>',
   close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   camera: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg>'
@@ -798,7 +854,8 @@ function groupRestaurants() {
 // Bearbeiten darf, wer den Eintrag geschrieben hat – auch wenn er im Namen einer anderen Person angelegt wurde (by)
 const canEdit = e => e.author === user || e.by === user;
 // Alle Personen: ich zuerst, dann der Rest alphabetisch
-const people = () => [user, ...[...new Set(live().map(e => e.author))].filter(a => a !== user).sort((a, b) => a.localeCompare(b, 'de'))].filter(Boolean);
+const GUESTS = '__gaeste__'; // Sonderwert für ui.person: alle Gäste-Bewertungen
+const people = () => [user, ...[...new Set(live().filter(e => !e.guest).map(e => e.author))].filter(a => a !== user).sort((a, b) => a.localeCompare(b, 'de'))].filter(Boolean);
 const lovedBy = (d, p) => d.byAuthor.some(e => e.author === p && e.verdict === 'good');
 const currentRestaurant = () => groupRestaurants().find(r => r.key === ui.rKey);
 const pillsHTML = t => ['good', 'mixed', 'ok', 'bad'].filter(k => t[k]).map(k => `<span class="pill ${k}">${SYM[k]} ${t[k]}</span>`).join('');
@@ -860,15 +917,16 @@ function greeting() {
 const goodDishes = rs => rs.flatMap(r => r.dishes.filter(d => d.status === 'good').map(d => ({ r, d })));
 function dashHTML() {
   const rs = groupRestaurants(), dishes = rs.flatMap(r => r.dishes), good = goodDishes(rs);
-  const authors = new Set(live().map(e => e.author));
+  const authors = new Set(live().filter(e => !e.guest).map(e => e.author)); // Gäste zählen hier nicht mit
   // Mehrere Autoren: nur was alle mit ✓ bewertet haben (Status good + jeder Autor hat eine Bewertung)
-  const favs = good.filter(x => x.d.byAuthor.length === authors.size).sort((a, b) => b.d.last - a.d.last).slice(0, 10);
+  const favs = rs.flatMap(r => r.dishes.map(d => ({ r, d }))).filter(x => authors.size && [...authors].every(a => lovedBy(x.d, a))).sort((a, b) => b.d.last - a.d.last).slice(0, 10);
   const ib = inbox(), [hi, sub] = greeting();
   let i = 0; const sec = (cls, html) => `<section class="${cls}" style="--i:${i++}">${html}</section>`;
   const stat = (n, label, cls = '') => `<div class="stat ${cls}"><b data-n="${n}">${n}</b><span>${label}</span></div>`;
   return sec('hello', `<div><h2>${esc(hi)}</h2><p>${sub}</p></div><span class="scene" aria-hidden="true">${parked('2 -18 118 90')}</span>`)
     + sec('stats', stat(rs.length, 'Restaurants') + stat(dishes.length, 'Gerichte') + stat(dishes.filter(d => d.status === 'bad').length, '✕ Nie wieder', 'bad'))
     + sec('', good.length ? `<div id="roll">${rollIdleHTML(good)}</div>` : '<p class="roll-hint">Noch kein Gericht mit <span class="v-good">✓</span> – sobald dir etwas schmeckt, schlägt Nochmal? es hier vor.</p>')
+    + sec('gbtns', `<button class="btn ghost" data-act="ev-new">${SVG.users}Gäste bewerten lassen</button><button class="btn ghost" data-act="paste-guests">${SVG.paste}Gäste-Antworten einfügen</button>`)
     + (ib ? sec('', `<div class="shelf-row"><h4 class="shelf">Neu von ${esc(ib.from)}</h4><button class="mini-btn" data-act="inbox-seen">Gesehen</button></div><div class="favs">${ib.list.map(e => tileHTML({ rKey: norm(e.restaurant), rName: e.restaurant, cuisine: (CMAP[e.cuisine] ? e.cuisine : 'other'), dish: e.dish, photo: photoOf(e), verdict: e.verdict })).join('')}</div>`) : '')
     + (favs.length ? sec('', `<h4 class="shelf">${authors.size > 1 ? 'Eure' : 'Deine'} Lieblinge</h4><div class="favs">${favs.map(({ r, d }) => tileHTML({ rKey: r.key, rName: r.name, cuisine: r.cuisine, dish: d.name, photo: d.photo, verdict: 'good' })).join('')}</div>`) : '');
 }
@@ -942,15 +1000,17 @@ function renderList(stagger) {
     CUISINES.filter(c => count[c.id]).map(c => catHTML(c.id, c.label, count[c.id], c.c)).join('');
 
   const ps = people(), pe = $('#people');
-  if (ui.person && !ps.includes(ui.person)) ui.person = null;
-  pe.hidden = ps.length < 2;
-  pe.innerHTML = ps.length < 2 ? '' : '<span>Lieblinge von</span>' + ps.map(p => {
+  const nGuest = live().filter(e => e.guest).length, showPe = ps.length > 1 || nGuest > 0;
+  if (ui.person && (ui.person === GUESTS ? !nGuest : !ps.includes(ui.person))) ui.person = null;
+  pe.hidden = !showPe;
+  pe.innerHTML = !showPe ? '' : ps.map(p => {
     const n = all.reduce((s, r) => s + r.dishes.filter(d => lovedBy(d, p)).length, 0);
-    return `<button class="pchip" data-act="person" data-p="${esc(p)}" aria-pressed="${ui.person === p}"><span class="av">${esc(p.slice(0, 1).toUpperCase())}</span>${esc(p)}<span class="n">✓ ${n}</span></button>`;
-  }).join('');
+    return `<button class="pchip" data-act="person" data-p="${esc(p)}" aria-pressed="${ui.person === p}"><span class="av">${esc(p.slice(0, 1).toUpperCase())}</span>${p === user ? 'Meine' : esc(p)}<span class="n">✓ ${n}</span></button>`;
+  }).join('') + (nGuest ? `<button class="pchip" data-act="person" data-p="${GUESTS}" aria-pressed="${ui.person === GUESTS}"><span class="av">${SVG.users}</span>Gäste<span class="n" style="color:var(--muted)">${nGuest}</span></button>` : '');
 
   const q = norm(ui.q); const hits = new Map();
   let list = all.filter(r => ui.cuisine === 'all' || r.cuisine === ui.cuisine);
+  if (ui.person === GUESTS) return renderGuestList(list, q, stagger);
   if (ui.person) return renderPersonList(list, q, stagger);
   if (q) list = list.filter(r => {
     const dh = r.dishes.filter(d => norm(d.name).includes(q));
@@ -988,6 +1048,20 @@ function renderPersonList(rs, q, stagger) {
     return `<button class="prow" data-act="open-dish" data-key="${esc(r.key)}" data-dish="${esc(d.key)}" style="--i:${Math.min(i, 12)}">
       ${ph ? `<img class="pimg" src="${esc(ph)}" alt="" loading="lazy">` : ico(r.cuisine)}<span class="pbody"><b>${esc(d.name)}</b><small>${esc(r.name)}${d.price != null ? ' · ' + fmtPrice(d.price) : ''} · ${relDate(e.createdAt)}</small>${e.note ? `<i>„${esc(e.note)}“</i>` : ''}</span></button>`; }).join('');
 }
+// Gäste-Filter: alle Bewertungen, die über Gast-Links kamen (jedes Urteil, neueste zuerst)
+function renderGuestList(rs, q, stagger) {
+  const el = $('#list'), keys = new Map(rs.map(r => [r.key, r]));
+  const rows = live().filter(e => e.guest && keys.has(norm(e.restaurant)))
+    .filter(e => !q || norm(e.dish).includes(q) || norm(e.restaurant).includes(q) || norm(e.author).includes(q))
+    .sort((a, b) => b.updatedAt - a.updatedAt);
+  $('#dash').hidden = true;
+  $('#lhead').innerHTML = `Gäste-Bewertungen <small>${rows.length}</small>`;
+  if (!rows.length) { el.className = ''; el.innerHTML = `<div class="noresult"><p>Keine Gäste-Bewertungen${q ? ` für „${esc(ui.q)}“` : ''}.</p></div>`; return; }
+  el.className = 'plist' + (stagger ? ' stagger' : '');
+  el.innerHTML = rows.map((e, i) => { const r = keys.get(norm(e.restaurant)), ph = photoOf(e);
+    return `<button class="prow" data-act="open-dish" data-key="${esc(r.key)}" data-dish="${esc(norm(e.dish))}" style="--i:${Math.min(i, 12)}">
+      ${ph ? `<img class="pimg" src="${esc(ph)}" alt="" loading="lazy">` : ico(r.cuisine)}<span class="pbody"><b>${esc(e.dish)}</b><small>${esc(r.name)} · ${relDate(e.updatedAt)}</small><span class="votes"><span class="vote ${e.verdict} guest"><span class="sym">${SYM[e.verdict]}</span>Gast: ${esc(e.author)}</span></span>${e.note ? `<i>„${esc(e.note)}“</i>` : ''}</span></button>`; }).join('');
+}
 const catHTML = (id, label, n, color) => `<button class="cbtn" data-act="cuisine" data-c="${id}" style="--c:${color}" aria-pressed="${ui.cuisine === id}">${ico(id, 'mid', color)}${esc(label)}<span class="cnt">${n}</span></button>`;
 function cardHTML(r, i, hit) {
   const c = CMAP[r.cuisine] || CMAP.other;
@@ -1021,7 +1095,7 @@ function dishHTML(d, i) {
   return `<button class="dish ${d.status}${d.photo ? ' has-pic' : ''}${fresh ? ' fresh' : ''}" data-act="dish" data-dish="${esc(d.key)}" style="--i:${Math.min(i, 12)}">
     ${d.photo ? `<img class="pic" src="${esc(d.photo)}" alt="" loading="lazy">` : ''}<div class="dbody">
     <div class="row1"><span class="name">${esc(d.name)}</span>${d.price != null ? `<span class="price">${fmtPrice(d.price)}</span>` : ''}</div>
-    <div class="votes">${d.byAuthor.map(e => `<span class="vote ${e.verdict}"><span class="sym">${VERDICT[e.verdict].sym}</span>${esc(e.author)}</span>`).join('')}${d.entries.length > 1 ? `<span class="count">${d.entries.length}× bewertet</span>` : ''}</div>
+    <div class="votes">${d.byAuthor.map(e => `<span class="vote ${e.verdict}${e.guest ? ' guest' : ''}"><span class="sym">${VERDICT[e.verdict].sym}</span>${e.guest ? 'Gast: ' : ''}${esc(e.author)}</span>`).join('')}${d.entries.length > 1 ? `<span class="count">${d.entries.length}× bewertet</span>` : ''}</div>
     ${d.note ? `<div class="note">„${esc(d.note)}“</div>` : ''}</div>
     ${d.status === 'bad' ? '<span class="stamp">Nie wieder</span>' : ''}</button>`;
 }
@@ -1057,6 +1131,7 @@ function openSettings() {
       ${PRESETS.map(p => `<button class="swatch${p.hex === accent ? ' on' : ''}" data-act="accent" data-hex="${p.hex}" style="--sw:${p.hex}"><span></span>${p.name}</button>`).join('')}
       <label class="swatch custom${PRESETS.some(p => p.hex === accent) ? '' : ' on'}" style="--sw:${accent}"><input type="color" id="f-color" value="${accent}" aria-label="Eigene Farbe wählen"><span></span>Eigene</label>
     </div><p class="hint">Grün, Gelb und Rot sind für die Ampel reserviert. Eine Akzentfarbe in diesen Tönen macht das Urteil schwerer lesbar.</p></div>
+    <div class="set-group"><span class="lbl">Gäste</span><div class="btns"><button class="btn ghost" data-act="ev-new">${SVG.users} Gäste bewerten lassen</button><button class="btn ghost" data-act="paste-guests">${SVG.paste} Gäste-Antworten einfügen</button></div><p class="hint">Freunde bewerten per Link ohne App und schicken eine Nachricht zurück.</p></div>
     <div class="set-group"><span class="lbl">Teilen & Sichern</span><div class="btns"><button class="btn ghost" data-act="export-all">${SVG.share} Alles exportieren</button><button class="btn ghost" data-act="import">${SVG.inbox} Datei importieren</button></div><p class="hint">Die Datei kannst du per Telegram schicken. Beim Import wird zusammengeführt – nichts landet doppelt, die neuere Version gewinnt.</p></div>
     <div class="set-group"><label class="toggle"><span><b>Animationen</b><small>Stempel, Roller & Co.</small></span><input type="checkbox" id="f-anim" ${animPref ? 'checked' : ''}><span class="sw"></span></label></div>
     <div class="set-group"><span class="lbl">Daten</span><div class="btns">${hasDemo() ? '<button class="btn ghost" data-act="remove-demo">Demo-Daten entfernen</button>' : live().length ? '' : '<button class="btn ghost" data-act="demo">Demo-Daten laden</button>'}<button class="btn danger" data-act="reset">Alle Daten auf diesem Gerät löschen</button></div><p class="hint">Alles bleibt nur auf diesem Gerät. Exportiere ab und zu als Backup. <span id="storage"></span></p></div>
@@ -1077,7 +1152,7 @@ function openDish(dKey) {
     <div class="sh-head">${ico(r.cuisine, 'mid')}<div><h2>${esc(d.name)}</h2><div class="sub">${esc(r.name)}${d.price != null ? ' · ' + fmtPrice(d.price) : ''}</div></div></div>
     ${d.photos.length ? `<div class="photos${d.photos.length > 1 ? ' multi' : ''}">${d.photos.map(p => `<img src="${esc(p)}" alt="Foto: ${esc(d.name)}">`).join('')}</div>` : ''}
     <div class="hist">${d.entries.map(e => `<div class="hitem"><span class="vote ${e.verdict}"><span class="sym">${VERDICT[e.verdict].sym}</span>${VERDICT[e.verdict].short}</span>
-      <div class="hmeta"><b>${esc(e.author)}</b> · ${relDate(e.createdAt)}${e.price != null ? ' · ' + fmtPrice(e.price) : ''}${e.note ? `<div class="note">„${esc(e.note)}“</div>` : ''}</div>
+      <div class="hmeta"><b>${e.guest ? 'Gast: ' : ''}${esc(e.author)}</b> · ${relDate(e.createdAt)}${e.price != null ? ' · ' + fmtPrice(e.price) : ''}${e.note ? `<div class="note">„${esc(e.note)}“</div>` : ''}</div>
       ${canEdit(e) ? `<button class="mini-btn" data-act="edit" data-id="${esc(e.id)}">Ändern</button>` : '<span></span>'}</div>`).join('')}</div>
     <div class="btns"><button class="btn primary" data-act="rate-again">Neu bewerten</button><button class="btn ghost" data-act="share-dish">${SVG.share} Teilen</button></div>`);
 }
@@ -1256,11 +1331,12 @@ function clean(x) {
   const restaurant = s(x.restaurant, 80), dish = s(x.dish, 100);
   if (!restaurant || !dish) return null;
   const num = t => Number.isFinite(+t) && +t > 0 ? +t : Date.now();
-  return { id: x.id.slice(0, 64), restaurant, cuisine: CMAP[x.cuisine] ? x.cuisine : 'other', dish,
+  return { id: x.id.slice(0, 160), restaurant, cuisine: CMAP[x.cuisine] ? x.cuisine : 'other', dish,
     price: typeof x.price === 'number' && isFinite(x.price) ? Math.round(x.price * 100) / 100 : null,
     verdict: x.verdict, note: s(x.note, 500),
     photo: typeof x.photo === 'string' && x.photo.length < 1500000 && /^data:image\/(jpeg|png|webp);base64,[a-z0-9+/]+=*$/i.test(x.photo) ? x.photo : null,
-    author: s(x.author, 24) || 'Unbekannt', ...(s(x.by, 24) ? { by: s(x.by, 24) } : {}),
+    author: s(x.author, 30) || 'Unbekannt', ...(s(x.by, 30) ? { by: s(x.by, 30) } : {}),
+    ...(s(x.guest, 30) ? { guest: s(x.guest, 30) } : {}), ...(isId(x.eveningId) ? { eveningId: x.eveningId } : {}),
     createdAt: num(x.createdAt), updatedAt: num(x.updatedAt), deleted: !!x.deleted };
 }
 function merge(list) {
@@ -1289,7 +1365,7 @@ $('#fileIn').addEventListener('change', async ev => {
 // Wer steht wie oft in der Datei (nur gültige, nicht gelöschte Einträge)
 function fileAuthors(data) {
   const m = new Map();
-  for (const raw of data.entries) { const c = clean(raw); if (c && !c.deleted) m.set(c.author, (m.get(c.author) || 0) + 1); }
+  for (const raw of data.entries) { const c = clean(raw); if (c && !c.deleted && !c.guest) m.set(c.author, (m.get(c.author) || 0) + 1); }
   return m;
 }
 function openImportSheet(data, others) {
@@ -1324,7 +1400,7 @@ function applyImport(data, map) {
     if (e.by && map.has(e.by)) e.by = ren(e.by);
   }
   if (renamed) persist();
-  const list = map.size ? data.entries.map(x => x && typeof x === 'object' ? { ...x, author: ren(cut(x.author)), ...(x.by ? { by: ren(cut(x.by)) } : {}) } : x) : data.entries;
+  const list = map.size ? data.entries.map(x => x && typeof x === 'object' ? { ...x, author: x.guest ? x.author : ren(cut(x.author)), ...(x.by ? { by: ren(cut(x.by)) } : {}) } : x) : data.entries;
   const res = merge(list);
   noteInbox(res.fresh, data.from && ren(data.from));
   ui.sheetLocked = false; closeSheet();
@@ -1345,6 +1421,224 @@ $('#photoIn').addEventListener('change', async ev => {
   catch (e) { toast('Das Foto ließ sich nicht laden'); }
   finally { slot?.classList.remove('busy'); }
 });
+
+/* ===================== Gäste: Link & Code ===================== */
+// Link: <LIVE_URL>#gast=<base64url(JSON {v,e,r,c,d,h,a})>   Antwort: Text + eigene Zeile NM1:<base64url(JSON {v,e,g,x:[{d,v,n}]})>
+// Beides kommt von außen → validieren, Längen kappen, nur über esc() anzeigen.
+const LIVE_URL = 'https://ovestridson.github.io/Nochmal/';
+const NOTE_CHIPS = ['Mega Portion', 'Kalt angekommen', 'Zu salzig', 'Würd ich wieder nehmen', 'Zu teuer'];
+const EMOJI = { pizza: '🍕', pasta: '🍝', burger: '🍔', doener: '🥙', schnitzel: '🍖', greek: '🥙', orient: '🧆', chicken: '🍗', asia: '🍜', sushi: '🍣', curry: '🍛', taco: '🌮', bowl: '🥗', breakfast: '🍳', sweet: '🍩', other: '🍽️' };
+const b64enc = s => { let bin = ''; new TextEncoder().encode(s).forEach(b => { bin += String.fromCharCode(b); }); return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+const b64dec = s => { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return new TextDecoder('utf-8', { fatal: true }).decode(Uint8Array.from(atob(s), c => c.charCodeAt(0))); };
+const cap = (v, n) => [...String(v ?? '').replace(/\s+/g, ' ').trim()].slice(0, n).join(''); // nach Zeichen, damit Emojis nicht zerbrechen
+function isId(s) { return typeof s === 'string' && /^[0-9a-z-]{8,64}$/i.test(s); }
+const hash32 = s => { let h = 0x811c9dc5; for (const ch of String(s)) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; } return h.toString(36); };
+const idPart = s => slug(s) === 'eintrag' && norm(s) !== 'eintrag' ? 'x' + hash32(norm(s)) : slug(s); // reine Emoji-Namen bekommen einen stabilen Hash
+const canShare = () => typeof navigator.share === 'function';
+async function copyText(t) {
+  try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(t); return true; } } catch (e) {}
+  const ta = document.createElement('textarea'); ta.value = t; ta.setAttribute('readonly', '');
+  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;font-size:16px'; document.body.appendChild(ta);
+  ta.select(); ta.setSelectionRange(0, t.length);
+  let ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+  ta.remove(); return ok;
+}
+async function shareText(t) {
+  try { await navigator.share({ text: t }); return true; } catch (e) { return false; }
+}
+// Kopieren ging gar nicht → Text zum Selbst-Markieren anzeigen
+function showManual(t) {
+  openSheet(`<button class="grab" data-act="close" aria-label="Schließen"></button><h2>Bitte selbst kopieren</h2><p class="hint" style="margin:-8px 2px 12px">Text lange antippen → Alles auswählen → Kopieren.</p><textarea class="inp g-manual" readonly>${esc(t)}</textarea>`);
+}
+
+/* ===================== Gäste (Host) ===================== */
+const evenings = () => { const a = store.get(LS.evenings, []); return Array.isArray(a) ? a : []; };
+function openEveningSheet() {
+  const rs = groupRestaurants();
+  ui.edit = { id: null, st: { verdict: null, cuisine: 'other', photo: null, author: user } }; // für Küchen-Knöpfe & onRestaurantInput
+  ui.ev = { dishes: [] };
+  openSheet(`<button class="grab" data-act="close" aria-label="Schließen"></button><h2>Gäste bewerten lassen</h2>
+    <p class="hint" style="margin:-8px 2px 16px">Freunde bewerten per Link – ohne App. Ihre Antworten fügst du danach hier ein.</p>
+    <div class="field"><label for="f-r">Restaurant</label><input class="inp" id="f-r" list="dl-r" placeholder="z. B. Pizzeria Da Gino" maxlength="80" autocomplete="off" autocapitalize="words" enterkeyhint="next"><datalist id="dl-r">${rs.map(r => `<option value="${esc(r.name)}">`).join('')}</datalist></div>
+    <div class="field"><span class="lbl">Küche</span><div class="cuisines">${CUISINES.map(c => `<button type="button" class="cbtn" data-act="pick-cuisine" data-c="${c.id}" style="--c:${c.c}" aria-pressed="${c.id === 'other'}">${ico(c.id, 'mid')}${esc(c.label)}</button>`).join('')}</div></div>
+    <div class="field"><label for="f-ed">Bestellte Gerichte</label><div class="ev-list" id="ev-list"></div>
+      <div class="ev-add"><input class="inp" id="f-ed" placeholder="Gericht eintippen" maxlength="100" autocomplete="off" enterkeyhint="done"><button type="button" class="iconbtn" data-act="ev-add" aria-label="Gericht hinzufügen">+</button></div>
+      <div id="ev-known"></div></div>
+    <div class="btns"><button class="btn primary" data-act="ev-create">Link erstellen</button></div>`, renderEvDishes);
+}
+function renderEvDishes() {
+  const r = groupRestaurants().find(x => x.key === norm($('#f-r').value)), have = new Set(ui.ev.dishes.map(norm));
+  $('#ev-list').innerHTML = ui.ev.dishes.map((d, k) => `<button type="button" class="who" data-act="ev-del" data-k="${k}" aria-pressed="true" aria-label="${esc(d)} entfernen">${esc(d)} ✕</button>`).join('');
+  const known = r ? r.dishes.filter(d => !have.has(d.key)) : [];
+  $('#ev-known').innerHTML = known.length ? `<span class="lbl">Schon bekannt – antippen</span><div class="whos">${known.map(d => `<button type="button" class="who" data-act="ev-known" data-name="${esc(d.name)}">+ ${esc(d.name)}</button>`).join('')}</div>` : '';
+}
+function evAdd(name) {
+  const inp = $('#f-ed'), d = cap(name ?? inp.value, 100);
+  if (!d) { if (name == null) fieldErr('#f-ed', 'Welches Gericht?'); return; }
+  if (ui.ev.dishes.length >= 12) return toast('Mehr als 12 Gerichte passen nicht in einen Link');
+  if (!ui.ev.dishes.some(x => norm(x) === norm(d))) ui.ev.dishes.push(d);
+  if (name == null) inp.value = '';
+  renderEvDishes();
+}
+function createEvening() {
+  if ($('#f-ed').value.trim()) evAdd();
+  const typed = cap($('#f-r').value, 80);
+  if (!typed) return fieldErr('#f-r', 'Welches Restaurant?');
+  if (!ui.ev.dishes.length) return fieldErr('#f-ed', 'Mindestens ein Gericht eintragen');
+  const existing = groupRestaurants().find(r => r.key === norm(typed));
+  const ev = { id: uuid(), restaurant: existing ? existing.name : typed, cuisine: ui.edit.st.cuisine, dishes: [...ui.ev.dishes], createdAt: Date.now() };
+  if (!store.set(LS.evenings, [...evenings(), ev].slice(-200))) return toast('Speichern fehlgeschlagen – Speicher voll oder gesperrt?');
+  const link = LIVE_URL + '#gast=' + b64enc(JSON.stringify({ v: 1, e: ev.id, r: ev.restaurant, c: ev.cuisine, d: ev.dishes, h: user, a: accent }));
+  ui.evLink = `${EMOJI[ev.cuisine] || '🍽️'} Wie war's bei ${ev.restaurant}? Bewerte in 10 Sekunden: ${link}`;
+  openSheet(`<button class="grab" data-act="close" aria-label="Schließen"></button><h2>Link für ${esc(ev.restaurant)} ist fertig</h2>
+    <p class="hint" style="margin:-8px 2px 14px">Schick ihn in eure Gruppe. Jede:r bewertet in ein paar Sekunden und schickt eine Nachricht zurück.</p>
+    <div class="ev-link">${esc(link)}</div>
+    <div class="g-btns${canShare() ? '' : ' one'}">${canShare() ? `<button class="btn primary" data-act="ev-share">${SVG.share} Teilen</button>` : ''}<button class="btn ${canShare() ? 'ghost' : 'primary'}" data-act="ev-copy">${SVG.copy} Kopieren</button></div>
+    <p class="hint" style="margin-top:14px">Antworten übernimmst du später mit „Gäste-Antworten einfügen“.</p>`);
+}
+async function pasteGuests() {
+  let t = '';
+  try { if (navigator.clipboard && navigator.clipboard.readText) t = await navigator.clipboard.readText(); } catch (e) {}
+  if (/NM1:/.test(t) && importGuestText(t)) return;
+  openSheet(`<button class="grab" data-act="close" aria-label="Schließen"></button><h2>Gäste-Antworten einfügen</h2>
+    <p class="hint" style="margin:-8px 2px 14px">Nachrichten aus der Gruppe kopieren und hier einfügen – mehrere auf einmal gehen auch.</p>
+    <div class="field"><textarea class="inp" id="f-paste" rows="6" placeholder="Nochmal? – Bewertung von …"></textarea></div>
+    <div class="btns"><button class="btn primary" data-act="paste-go">Übernehmen</button></div>`);
+}
+// Alle NM1:-Codes im Text übernehmen. Restaurant & Küche kommen aus dem lokal gespeicherten Abend, nie aus dem Code.
+function importGuestText(text) {
+  const codes = [...String(text).matchAll(/NM1:([A-Za-z0-9_-]+)/g)].map(m => m[1]).slice(0, 50);
+  if (!codes.length) { toast('Keine Gäste-Antwort im Text gefunden'); return false; }
+  const evs = new Map(evenings().filter(e => e && isId(e.id)).map(e => [e.id, e])), byId = new Map(entries.map(e => [e.id, e]));
+  const got = new Map(), fresh = new Set(), now = Date.now(); let missing = 0, broken = 0, same = 0;
+  for (const code of codes) {
+    let o; try { o = code.length < 20000 && JSON.parse(b64dec(code)); } catch (e) { o = null; }
+    if (!o || o.v !== 1 || !isId(o.e) || !Array.isArray(o.x)) { broken++; continue; }
+    const ev = evs.get(o.e); if (!ev) { missing++; continue; }
+    const g = cap(o.g, 30); if (!g) { broken++; continue; }
+    for (const it of o.x.slice(0, 30)) {
+      if (!it || !VERDICT[it.v]) continue;
+      const dish = (ev.dishes || []).find(d => norm(d) === norm(cap(it.d, 100))); if (!dish) continue; // nur Gerichte des Abends
+      const x = clean({ id: `${ev.id}-${idPart(g)}-${idPart(dish)}`, restaurant: ev.restaurant, cuisine: ev.cuisine, dish, price: null, verdict: it.v,
+        note: cap(it.n, 200), author: g, by: user, guest: g, eveningId: ev.id, createdAt: now, updatedAt: now, deleted: false });
+      if (!x) continue;
+      delete x.photo;
+      const ex = byId.get(x.id);
+      if (!ex) { entries.push(x); byId.set(x.id, x); }
+      else if (ex.verdict !== x.verdict || ex.note !== x.note) Object.assign(ex, { verdict: x.verdict, note: x.note, deleted: false, updatedAt: now }); // gleicher Gast, neue Meinung → überschreiben
+      else { same++; continue; }
+      const who = byId.get(x.id).author; // bekannte Schreibweise des Gasts
+      fresh.add(x.id); got.set(who, (got.get(who) || 0) + 1);
+    }
+  }
+  if (!got.size) {
+    toast(missing ? 'Abend nicht gefunden – nichts importiert' : same ? 'Schon übernommen – nichts Neues' : 'Code kaputt – nichts importiert');
+    return !broken && !missing && same > 0;
+  }
+  persist(); closeSheet();
+  ui.fresh = fresh; setTimeout(() => ui.fresh.clear(), 4000);
+  ui.q = ''; ui.cuisine = 'all'; ui.person = null;
+  if (ui.view === 'detail') history.back();
+  ui.view = 'home'; renderHome({ stagger: true }); window.scrollTo(0, 0);
+  scooter('rtl', 'Post von Gästen!');
+  toast([...got].map(([g, n]) => `${n} Bewertung${n === 1 ? '' : 'en'} von ${g}`).join(' · ') + ' übernommen' + (missing ? ' · ein Abend nicht gefunden' : ''));
+  return true;
+}
+
+/* ===================== Gast-Modus ===================== */
+const gst = { L: null, name: '', picks: [], open: -1, sent: false };
+function parseGuestLink(hash) {
+  const raw = hash.replace(/^#gast=/, '');
+  if (!raw || raw.length > 8000) throw new Error('link');
+  const o = JSON.parse(b64dec(raw));
+  if (!o || o.v !== 1 || !isId(o.e)) throw new Error('link');
+  const r = cap(o.r, 80), seen = new Set();
+  const d = (Array.isArray(o.d) ? o.d : []).map(x => cap(x, 100)).filter(x => x && !seen.has(norm(x)) && seen.add(norm(x))).slice(0, 12);
+  if (!r || !d.length) throw new Error('link');
+  return { e: o.e, r, c: CMAP[o.c] ? o.c : 'other', d, h: cap(o.h, 30) || 'Dein Gastgeber', a: typeof o.a === 'string' && /^#[0-9a-f]{6}$/i.test(o.a) ? o.a.toLowerCase() : null };
+}
+function startGuest() {
+  document.body.classList.add('guest');
+  try { gst.L = parseGuestLink(location.hash); } catch (e) { gst.L = null; }
+  if (gst.L && gst.L.a) accent = gst.L.a;
+  applyTheme();
+  if (!gst.L) {
+    $('#view').innerHTML = `<div class="empty">${ico('other', 'big', 'var(--accent)')}<h2>Dieser Link klappt leider nicht</h2><p>Vielleicht wurde er beim Kopieren abgeschnitten. Frag am besten nach einem neuen Link.</p></div>`;
+    return;
+  }
+  const L = gst.L;
+  gst.name = cap(store.get(LS.guest, ''), 30);
+  gst.picks = L.d.map(() => ({ v: null, chips: [], free: '', freeOpen: false }));
+  document.title = `Wie war's bei ${L.r}?`;
+  $('#view').innerHTML = `<header class="g-head">${ico(L.c, 'mid')}<div><h1>Wie war’s bei ${esc(L.r)}?</h1><p>${esc(L.h)} fragt nach.</p></div></header>
+    <div class="field g-name"><label for="g-name">Dein Name</label><input class="inp" id="g-name" maxlength="30" value="${esc(gst.name)}" placeholder="Vorname" autocomplete="given-name" autocapitalize="words" enterkeyhint="done"></div>
+    <div class="g-dishes">${L.d.map((_, i) => dishCardHTML(i)).join('')}</div>
+    <p class="g-hint">🔒 Nichts wird hochgeladen – du schickst nur eine Nachricht.</p>
+    <div class="g-send" id="g-send"></div>`;
+  renderSend();
+}
+const noteOf = p => cap([...p.chips, p.free].map(s => String(s).trim()).filter(Boolean).join(', '), 200);
+function dishCardHTML(i) {
+  const p = gst.picks[i], open = gst.open === i && p.v, note = noteOf(p);
+  return `<div class="g-dish ${p.v || ''}" id="gd${i}">
+    <button type="button" class="g-top" data-act="g-open" data-i="${i}"><b>${esc(gst.L.d[i])}</b>${!open && note ? `<small>„${esc(note)}“</small>` : ''}</button>
+    <div class="g-vs">${['good', 'ok', 'bad'].map(v => `<button type="button" class="gv ${v}" data-act="g-v" data-i="${i}" data-v="${v}" aria-pressed="${p.v === v}"><span class="sym">${SYM[v]}</span>${VERDICT[v].short}</button>`).join('')}</div>
+    ${open ? `<div class="g-more">${NOTE_CHIPS.map((c, k) => `<button type="button" class="g-chip" data-act="g-chip" data-i="${i}" data-k="${k}" aria-pressed="${p.chips.includes(c)}">${esc(c)}</button>`).join('')}<button type="button" class="g-chip" data-act="g-free" data-i="${i}" aria-pressed="${p.freeOpen}">✎ Eigener Text</button></div>
+      ${p.freeOpen ? `<input class="inp g-free" id="g-free" data-i="${i}" maxlength="120" value="${esc(p.free)}" placeholder="Was willst du noch sagen?" autocomplete="off" enterkeyhint="done">` : ''}` : ''}</div>`;
+}
+function redrawDish(i) { const el = $('#gd' + i); if (el) el.outerHTML = dishCardHTML(i); }
+function guestVote(i, v) {
+  const p = gst.picks[i], prev = gst.open;
+  p.v = p.v === v ? null : v; // nochmal tippen = abwählen
+  gst.open = p.v ? i : (gst.open === i ? -1 : gst.open);
+  if (prev !== i && prev >= 0) redrawDish(prev);
+  redrawDish(i); renderSend();
+  if (p.v) guestReact($(`#gd${i} .gv.${v}`), v, $('#gd' + i));
+}
+// 🟢 Herzen & Konfetti · 🟡 Achselzucken · 🔴 „Nie wieder“-Stempel
+function guestReact(btn, v, card) {
+  if (!animOn() || !btn) return;
+  if (v === 'ok') return restart(btn, 'shrug');
+  if (v === 'bad') {
+    const l = document.createElement('div'); l.className = 'stamp-layer'; l.innerHTML = '<span class="stamp big">Nie wieder</span>';
+    card.appendChild(l); restart(card, 'thud'); setTimeout(() => l.remove(), 1700); return;
+  }
+  for (let k = 0; k < 12; k++) {
+    const s = document.createElement('span'), a = (k / 12) * Math.PI * 2 + Math.random() * .5, d = 34 + Math.random() * 30;
+    s.className = 'burst' + (k % 3 ? '' : ' cf'); if (k % 3) s.textContent = '♥';
+    s.style.setProperty('--dx', `${Math.cos(a) * d}px`); s.style.setProperty('--dy', `${Math.sin(a) * d - 12}px`); s.style.setProperty('--r', `${(Math.random() - .5) * 120}deg`);
+    btn.appendChild(s); setTimeout(() => s.remove(), 900);
+  }
+}
+function renderSend() {
+  const el = $('#g-send'); if (!el) return;
+  if (!gst.name.trim()) { el.innerHTML = '<p class="g-need">Erst sagen, wer du bist 😄</p>'; return; }
+  if (!gst.picks.some(p => p.v)) { el.innerHTML = '<p class="g-need">Mindestens ein Gericht bewerten</p>'; return; }
+  const sh = canShare();
+  el.innerHTML = (gst.sent ? `<p class="g-thanks">Danke! ${esc(gst.L.h)} freut sich. 🎉</p>` : '')
+    + `<div class="g-btns${sh ? '' : ' one'}">${sh ? `<button class="btn primary" data-act="g-share">${SVG.share} Teilen</button>` : ''}<button class="btn ${sh ? 'ghost' : 'primary'}" data-act="g-copy" id="g-copy">${SVG.copy} Kopieren</button></div>`;
+}
+function guestMessage() {
+  const L = gst.L, g = cap(gst.name, 30);
+  const x = gst.picks.map((p, i) => p.v && { d: L.d[i], v: p.v, n: noteOf(p) }).filter(Boolean);
+  return [`Nochmal? – Bewertung von ${g} für ${L.r}`, ...x.map(o => `${VERDICT[o.v].emoji} ${o.d}${o.n ? ' – ' + o.n : ''}`), `NM1:${b64enc(JSON.stringify({ v: 1, e: L.e, g, x }))}`].join('\n');
+}
+async function guestSend(how) {
+  if (!gst.name.trim() || !gst.picks.some(p => p.v)) return;
+  const msg = guestMessage();
+  let ok;
+  if (how === 'share') ok = await shareText(msg);
+  else {
+    ok = await copyText(msg);
+    if (ok) { const b = $('#g-copy'); if (b) b.textContent = '✓ Kopiert – jetzt in die Gruppe einfügen'; toast('✓ Kopiert – jetzt in die Gruppe einfügen'); }
+    else return showManual(msg);
+  }
+  if (!ok) return;
+  store.set(LS.guest, cap(gst.name, 30)); // einziger Key im Gast-Modus: Name fürs nächste Mal
+  scooter('ltr', 'Ab in die Gruppe!');
+  gst.sent = true;
+  setTimeout(renderSend, animOn() ? 1600 : 0);
+}
 
 /* ===================== Demo ===================== */
 // Demo-Einträge tragen demo:true – sie werden nie exportiert/geteilt und lassen sich gezielt entfernen.
@@ -1423,6 +1717,21 @@ document.addEventListener('click', ev => {
       ui.cuisine = el.dataset.c === ui.cuisine ? 'all' : el.dataset.c;
       renderList(true); poke($(`#cats .cbtn[data-c="${ui.cuisine}"] .ico`)); break;
     case 'roll': roll(); break;
+    case 'ev-new': openEveningSheet(); break;
+    case 'ev-add': evAdd(); break;
+    case 'ev-del': ui.ev.dishes.splice(+el.dataset.k, 1); renderEvDishes(); break;
+    case 'ev-known': evAdd(el.dataset.name); break;
+    case 'ev-create': createEvening(); break;
+    case 'ev-share': shareText(ui.evLink).then(ok => { if (ok) toast('Geteilt'); }); break;
+    case 'ev-copy': copyText(ui.evLink).then(ok => ok ? toast('✓ Link kopiert') : showManual(ui.evLink)); break;
+    case 'paste-guests': pasteGuests(); break;
+    case 'paste-go': { const ta = $('#f-paste'); if (!ta.value.trim()) return fieldErr('#f-paste', 'Erst Nachrichten einfügen'); importGuestText(ta.value); break; }
+    case 'g-v': guestVote(+el.dataset.i, el.dataset.v, el); break;
+    case 'g-open': if (gst.picks[+el.dataset.i]?.v) { const o = gst.open; gst.open = +el.dataset.i; if (o !== gst.open) redrawDish(o); redrawDish(gst.open); } break;
+    case 'g-chip': { const p = gst.picks[+el.dataset.i], c = NOTE_CHIPS[+el.dataset.k]; p.chips = p.chips.includes(c) ? p.chips.filter(x => x !== c) : [...p.chips, c]; el.setAttribute('aria-pressed', p.chips.includes(c)); break; }
+    case 'g-free': { const i = +el.dataset.i; gst.picks[i].freeOpen = !gst.picks[i].freeOpen; redrawDish(i); if (gst.picks[i].freeOpen) $('#g-free')?.focus(); break; }
+    case 'g-share': guestSend('share'); break;
+    case 'g-copy': guestSend('copy'); break;
     case 'person': ui.person = el.dataset.p === ui.person ? null : el.dataset.p; renderList(true); break;
     case 'open-dish': { const dk = el.dataset.dish; openRestaurant(el.dataset.key, null).then(() => openDish(dk)); break; }
     case 'pick-who': pickWho(el.dataset.name); break;
@@ -1469,25 +1778,31 @@ document.addEventListener('input', ev => {
   const t = ev.target;
   if (t.classList.contains('err')) t.classList.remove('err');
   if (t.id === 'q') { ui.q = t.value; renderList(false); }
-  else if (t.id === 'f-r') onRestaurantInput();
+  else if (t.id === 'f-r') { onRestaurantInput(); if ($('#ev-known')) renderEvDishes(); }
+  else if (t.id === 'g-name') { gst.name = t.value; renderSend(); }
+  else if (t.id === 'g-free') gst.picks[+t.dataset.i].free = t.value;
   else if (t.id === 'f-color') setAccent(t.value); // Live-Vorschau beim Ziehen im Farbwähler
 });
 document.addEventListener('change', ev => {
   if (ev.target.id === 'f-anim') { animPref = ev.target.checked; store.set(LS.anim, animPref); applyAnim(); }
 });
 document.addEventListener('keydown', ev => {
-  if (ev.key === 'Enter' && ev.target.id === 'q') ev.target.blur();
+  if (ev.key === 'Enter' && (ev.target.id === 'q' || ev.target.id === 'g-name' || ev.target.id === 'g-free')) ev.target.blur();
+  if (ev.key === 'Enter' && ev.target.id === 'f-ed') { ev.preventDefault(); evAdd(); }
   if (ev.key === 'Escape') closeSheet();
 });
 window.addEventListener('popstate', () => { if (ui.view === 'detail') goHome(); });
 
 /* ===================== Start ===================== */
-applyAnim();
-applyTheme();
-migrateLegacyDemo();
-renderHome({ stagger: true });
-if (!user) openNameSheet();
-loadPhotos().then(migratePhotos).then(() => { if (photos.size) rerender(); });
+if (GUEST) startGuest();
+else {
+  applyAnim();
+  applyTheme();
+  migrateLegacyDemo();
+  renderHome({ stagger: true });
+  if (!user) openNameSheet();
+  loadPhotos().then(migratePhotos).then(() => { if (photos.size) rerender(); });
+}
 })();
 </script>
 </body>
