@@ -15,13 +15,15 @@ Live: https://ovestridson.github.io/Nochmal/
 ## Speicher
 - **Nur lokal im Browser** – Sinn der Regel: kein Online-Speicher/Cloud-Dienst, der Geld kostet. Lokale Browser-Speicher (localStorage, IndexedDB) sind erlaubt.
 - Präfix **`nochmal`** überall (Domain wird mit GameRegal geteilt!).
-- `localStorage`: Keys `nochmal_v1` (Einträge ohne Fotos), `nochmal_user`, `nochmal_anim`, `nochmal_accent`, `nochmal_inbox` (`{ from, ids, at }` – „Neu von …“ nach einem Import mit fremdem Autor; weg nach „Gesehen“ oder 7 Tagen, gelöschte/fehlende IDs werden ignoriert), `nochmal_alias` (`{ alterName: neuerName }` – Umbenennungen aus dem Import). Lesen/Schreiben immer über `store.get/set` (try/catch).
+- `localStorage`: Keys `nochmal_v1` (Einträge ohne Fotos), `nochmal_user`, `nochmal_anim`, `nochmal_accent`, `nochmal_inbox` (`{ from, ids, at }` – „Neu von …“ nach einem Import mit fremdem Autor; weg nach „Gesehen“ oder 7 Tagen, gelöschte/fehlende IDs werden ignoriert), `nochmal_alias` (`{ alterName: neuerName }` – Umbenennungen aus dem Import), `nochmal_evenings` (Gast-Abende: `[{ id, restaurant, cuisine, dishes: [string], createdAt }]`, max. 200).
+- **Ausnahme Gast-Modus:** dort wird einzig `nochmal_gastname` gelesen/geschrieben (Name vorausfüllen) – sonst nichts, auch keine IndexedDB. `GUEST` wird ganz oben erkannt, bevor irgendein anderer Key gelesen wird. Lesen/Schreiben immer über `store.get/set` (try/catch).
 - `IndexedDB` „nochmal“, Store `photos`: Fotos, Schlüssel = Eintrags-id. Beim Start komplett in die Map `photos` geladen (`loadPhotos`), Zugriff über `photoOf(e)`, Schreiben über `setPhoto/setPhotos`.
 
 ## Datenmodell
 Ein Eintrag = eine Bewertung:
-`{ id, restaurant, cuisine, dish, price|null, verdict:'good'|'ok'|'bad', note, author, by?, createdAt, updatedAt, deleted, demo? }`
+`{ id, restaurant, cuisine, dish, price|null, verdict:'good'|'ok'|'bad', note, author, by?, guest?, eveningId?, createdAt, updatedAt, deleted, demo? }`
 - `author` = wessen Urteil es ist. `by` = wer den Eintrag angelegt hat, nur gesetzt, wenn das jemand anderes war („im Namen von“, Editor-Feld „Bewertet von“).
+- `guest` = Name des Gasts, `eveningId` = Abend, über den die Bewertung kam (nur bei Gast-Bewertungen; `author` = Gastname, `by` = Host). Bleiben bei Export/Import erhalten; alte Einträge ohne diese Felder funktionieren unverändert.
 - `photo` steht **nur in Exportdateien** (JPEG-Data-URL). Auf dem Gerät liegt es in der IndexedDB (siehe Speicher). `shrinkPhoto()` rechnet auf max. 1200 px / ca. 250 KB herunter. Beim Löschen eines Eintrags wird sein Foto entfernt.
 - Küchen (`CUISINES`): Pizza, Pasta, Burger, Döner, Schnitzel & Deutsch, Griechisch, Orientalisch, Hähnchen, Asiatisch, Sushi, Indisch, Mexikanisch, Bowl & Salat, Frühstück, Süßes, Sonstiges – jede mit eigenem SVG-Icon + Poke-Animation. Nur Essen, kein Non-Food.
 - `id` über `uuid()` (hat Fallback, weil `crypto.randomUUID` über http fehlt).
@@ -38,6 +40,14 @@ Ein Eintrag = eine Bewertung:
 - Import = Zusammenführen über `id`: neu → hinzufügen, bekannt → neueres `updatedAt` gewinnt. Nichts doppelt.
 - Stehen fremde Namen in der Datei, fragt erst ein Sheet, wie sie heißen sollen (vorausgefüllt aus `nochmal_alias`). Die Umbenennung gilt auch für vorhandene Einträge (ohne `updatedAt` zu ändern). Beim Export werden die Namen über `nochmal_alias` zurückübersetzt, damit die andere Person ihre Einträge unter ihrem eigenen Namen bekommt.
 - Formatänderungen nur abwärtskompatibel (`v` hochzählen, alte Dateien weiter lesbar).
+## Gast-Bewertungen per Link
+- **Host:** „Gäste bewerten lassen“ (Dashboard + Einstellungen) → Restaurant, Küche, Gerichte (bekannte antippbar, max. 12) → Abend in `nochmal_evenings` → Link + „Teilen“/„Kopieren“. Text: „{Küchen-Emoji} Wie war's bei {Restaurant}? Bewerte in 10 Sekunden: <Link>“.
+- **Link:** `LIVE_URL#gast=<base64url(JSON)>`, JSON `{ v:1, e:abendId, r:restaurant, c:cuisine, d:[gerichte], h:hostname, a:akzentfarbe }`. UTF-8 über `b64enc/b64dec` (TextEncoder/TextDecoder).
+- **Gast-Modus** (gleiche `index.html`, `startGuest()`): nur die Gast-Ansicht, kein Dashboard/Einstellungen/Demo/FAB. Name (max. 30) + pro Gericht drei Ampel-Knöpfe (≥ 48px, nochmal tippen = abwählen), Schnell-Chips `NOTE_CHIPS` + Freitext. Reaktionen: 🟢 Herzen/Konfetti, 🟡 Achselzucken, 🔴 Stempel. Senden gesperrt mit lockerem Hinweis, bis Name + 1 Bewertung da sind. „Teilen“ nur mit `navigator.share`, sonst „Kopieren“ volle Breite (Fallback `execCommand`, zuletzt Text zum Selbst-Markieren).
+- **Antwort-Nachricht:** lesbare Zeilen („Nochmal? – Bewertung von {Name} für {Restaurant}“, „🟢 Gericht – Notiz“), am Ende eigene Zeile `NM1:<base64url(JSON)>`, JSON `{ v:1, e:abendId, g:gastname, x:[{ d:gericht, v:verdict, n:notiz }] }`.
+- **Import** („Gäste-Antworten einfügen“, `importGuestText`): erst `clipboard.readText()`, sonst Textfeld. Findet alle `NM1:`-Codes per Regex. Restaurant/Küche kommen aus dem **lokalen** Abend (unbekannter Abend → „Abend nicht gefunden“), nur Gerichte des Abends. ID deterministisch `<abendId>-<slug(gast)>-<slug(gericht)>` (`idPart`, Emoji-only → Hash) → erneute Bewertung überschreibt, gleiche Nachricht doppelt = nichts Neues. Alles läuft durch `clean()`.
+- Link- und Code-Daten sind nicht vertrauenswürdig: validieren (`parseGuestLink`, `isId`), mit `cap()` nach Zeichen kappen, nur über `esc()` anzeigen. Kaputter Link → freundliche Fehlermeldung.
+- **Anzeige:** „Gast: {Name}“ an Stimmen und im Verlauf; Personen-Leiste „Meine / {Name} / Gäste“ (`GUESTS`, `renderGuestList`). Gäste zählen nicht als Person für „Eure Lieblinge“, „Bewertet von“ und das Umbenennen-Sheet.
 - Bekannte iOS-Grenze: Homescreen-Web-Apps haben eigenen Speicher, Links aus Telegram öffnen nicht dorthin. Darum Datei statt Link.
 
 ## Design
@@ -78,4 +88,4 @@ Von oben nach unten:
 - Commit-Nachrichten kurz, auf Deutsch.
 
 ## Ideen (noch nicht gebaut)
-- Hash-Link als Abkürzung fürs Teilen einzelner Einträge (gleiches Datenformat).
+- Hash-Link als Abkürzung fürs Teilen einzelner Einträge (Gast-Links nutzen schon `#gast=` + `b64enc`).
