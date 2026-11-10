@@ -31,7 +31,7 @@ body::before{content:"";position:fixed;left:-20vw;right:-20vw;top:-20vh;height:7
   background:radial-gradient(55% 60% at 50% 0%,rgba(var(--accent-rgb),.17),transparent 70%),radial-gradient(35% 45% at 88% 8%,rgba(251,113,133,.08),transparent 70%)}
 body.locked{overflow:hidden}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}
-input,textarea{font:inherit;font-size:16px;color:var(--text)} /* 16px = kein Auto-Zoom auf iOS */
+input,textarea,select{font:inherit;font-size:16px;color:var(--text)} /* 16px = kein Auto-Zoom auf iOS */
 svg{display:block;max-width:100%}
 .app{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 112px)}
 
@@ -145,6 +145,8 @@ svg{display:block;max-width:100%}
 .ev-add .inp{flex:1;min-width:0}
 .ev-add .iconbtn{flex:none;width:50px;height:50px;font-size:26px;font-weight:600;color:var(--accent)}
 #ev-known .lbl{margin-top:14px}
+.inp.sel{padding-right:42px;cursor:pointer;text-overflow:ellipsis;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 22px) 52%,calc(100% - 16px) 52%;background-size:6px 6px;background-repeat:no-repeat}
+.sel option{background:var(--bg2);color:var(--text)}
 .ev-link{margin:0 0 14px;padding:12px 14px;border-radius:14px;background:var(--surface);border:1px dashed var(--line);font-size:13px;color:var(--muted);word-break:break-all;max-height:84px;overflow:hidden}
 
 /* ---------- Gast-Modus ---------- */
@@ -1434,7 +1436,9 @@ const cap = (v, n) => [...String(v ?? '').replace(/\s+/g, ' ').trim()].slice(0, 
 function isId(s) { return typeof s === 'string' && /^[0-9a-z-]{8,64}$/i.test(s); }
 const hash32 = s => { let h = 0x811c9dc5; for (const ch of String(s)) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; } return h.toString(36); };
 const idPart = s => slug(s) === 'eintrag' && norm(s) !== 'eintrag' ? 'x' + hash32(norm(s)) : slug(s); // reine Emoji-Namen bekommen einen stabilen Hash
-const canShare = () => typeof navigator.share === 'function';
+// Teilen gilt als kaputt, sobald es einmal gescheitert ist (z. B. Telegram-Browser unter Android) → nur noch Kopieren
+let shareBroken = false;
+const canShare = () => !shareBroken && typeof navigator.share === 'function';
 async function copyText(t) {
   try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(t); return true; } } catch (e) {}
   const ta = document.createElement('textarea'); ta.value = t; ta.setAttribute('readonly', '');
@@ -1443,8 +1447,22 @@ async function copyText(t) {
   let ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
   ta.remove(); return ok;
 }
+// Ergebnis: 'ok' | 'abort' (selbst abgebrochen) | 'fail' (geht hier nicht → Aufrufer kopiert stattdessen).
+// Manche In-App-Browser haben navigator.share, scheitern aber sofort oder zeigen nie ein Teilen-Fenster.
 async function shareText(t) {
-  try { await navigator.share({ text: t }); return true; } catch (e) { return false; }
+  if (!canShare()) return 'fail';
+  let left = false; const mark = () => { left = true; }, t0 = Date.now();
+  window.addEventListener('blur', mark); document.addEventListener('visibilitychange', mark);
+  let p;
+  try { p = navigator.share({ text: t }); } catch (e) { p = Promise.reject(e); }
+  // Ein echtes „Abbrechen“ braucht Zeit oder lässt die Seite kurz den Fokus verlieren – ein sofortiger Fehler heißt: geht nicht
+  const res = Promise.resolve(p).then(() => 'ok', e => e && e.name === 'AbortError' && (left || Date.now() - t0 > 700) ? 'abort' : 'fail');
+  let r = await Promise.race([res, new Promise(ok => setTimeout(() => ok('pending'), 1500))]);
+  // Android: Ist nach 1,5 s noch kein Teilen-Fenster aufgegangen (Seite nie verlassen), klemmt Teilen
+  if (r === 'pending') r = !left && /Android/i.test(navigator.userAgent) ? 'fail' : await res;
+  window.removeEventListener('blur', mark); document.removeEventListener('visibilitychange', mark);
+  if (r === 'fail') shareBroken = true;
+  return r;
 }
 // Kopieren ging gar nicht → Text zum Selbst-Markieren anzeigen
 function showManual(t) {
@@ -1453,13 +1471,35 @@ function showManual(t) {
 
 /* ===================== Gäste (Host) ===================== */
 const evenings = () => { const a = store.get(LS.evenings, []); return Array.isArray(a) ? a : []; };
+// Bekannte Restaurants aus Bewertungen UND früheren Gäste-Abenden – mit Küche und allen bisher bekannten Gerichten
+function knownRestaurants() {
+  const m = new Map();
+  const put = (name, cuisine, last, dishes) => {
+    const k = norm(name); if (!k) return;
+    const r = m.get(k) || { key: k, name, cuisine, last: 0, dishes: new Map() };
+    if (last > r.last) { r.last = last; r.cuisine = CMAP[cuisine] ? cuisine : r.cuisine; }
+    for (const d of dishes) if (norm(d) && !r.dishes.has(norm(d))) r.dishes.set(norm(d), d);
+    m.set(k, r);
+  };
+  for (const r of groupRestaurants()) put(r.name, r.cuisine, r.last, r.dishes.map(d => d.name)); // Bewertungen zuerst → deren Schreibweise gewinnt
+  for (const e of evenings()) if (e && typeof e.restaurant === 'string') put(e.restaurant, e.cuisine, +e.createdAt || 0, Array.isArray(e.dishes) ? e.dishes.filter(d => typeof d === 'string') : []);
+  return [...m.values()].sort((a, b) => b.last - a.last);
+}
+// Auswahl im Menü (oder passend getippt): Name, Küche und Gericht-Vorschläge übernehmen
+function pickKnownRestaurant(key) {
+  const r = knownRestaurants().find(x => x.key === key); if (!r) return;
+  $('#f-r').value = r.name;
+  if (ui.edit.st.cuisine !== r.cuisine) { ui.edit.st.cuisine = r.cuisine || 'other'; syncCuisineBtns(true); }
+  renderEvDishes();
+}
 function openEveningSheet() {
-  const rs = groupRestaurants();
+  const rs = groupRestaurants(), kr = knownRestaurants();
   ui.edit = { id: null, st: { verdict: null, cuisine: 'other', photo: null, author: user } }; // für Küchen-Knöpfe & onRestaurantInput
   ui.ev = { dishes: [] };
   openSheet(`<button class="grab" data-act="close" aria-label="Schließen"></button><h2>Gäste bewerten lassen</h2>
     <p class="hint" style="margin:-8px 2px 16px">Freunde bewerten per Link – ohne App. Ihre Antworten fügst du danach hier ein.</p>
-    <div class="field"><label for="f-r">Restaurant</label><input class="inp" id="f-r" list="dl-r" placeholder="z. B. Pizzeria Da Gino" maxlength="80" autocomplete="off" autocapitalize="words" enterkeyhint="next"><datalist id="dl-r">${rs.map(r => `<option value="${esc(r.name)}">`).join('')}</datalist></div>
+    ${kr.length ? `<div class="field"><label for="f-known">Bekanntes Restaurant</label><select class="inp sel" id="f-known"><option value="">Auswählen …</option>${kr.map(r => `<option value="${esc(r.key)}">${esc(r.name)}${r.dishes.size ? ` · ${r.dishes.size} Gericht${r.dishes.size === 1 ? '' : 'e'}` : ''}</option>`).join('')}</select></div>` : ''}
+    <div class="field"><label for="f-r">${kr.length ? 'Oder neues Restaurant' : 'Restaurant'}</label><input class="inp" id="f-r" list="dl-r" placeholder="z. B. Pizzeria Da Gino" maxlength="80" autocomplete="off" autocapitalize="words" enterkeyhint="next"><datalist id="dl-r">${rs.map(r => `<option value="${esc(r.name)}">`).join('')}</datalist></div>
     <div class="field"><span class="lbl">Küche</span><div class="cuisines">${CUISINES.map(c => `<button type="button" class="cbtn" data-act="pick-cuisine" data-c="${c.id}" style="--c:${c.c}" aria-pressed="${c.id === 'other'}">${ico(c.id, 'mid')}${esc(c.label)}</button>`).join('')}</div></div>
     <div class="field"><label for="f-ed">Bestellte Gerichte</label><div class="ev-list" id="ev-list"></div>
       <div class="ev-add"><input class="inp" id="f-ed" placeholder="Gericht eintippen" maxlength="100" autocomplete="off" enterkeyhint="done"><button type="button" class="iconbtn" data-act="ev-add" aria-label="Gericht hinzufügen">+</button></div>
@@ -1467,10 +1507,11 @@ function openEveningSheet() {
     <div class="btns"><button class="btn primary" data-act="ev-create">Link erstellen</button></div>`, renderEvDishes);
 }
 function renderEvDishes() {
-  const r = groupRestaurants().find(x => x.key === norm($('#f-r').value)), have = new Set(ui.ev.dishes.map(norm));
+  const key = norm($('#f-r').value), r = knownRestaurants().find(x => x.key === key), have = new Set(ui.ev.dishes.map(norm));
+  const sel = $('#f-known'); if (sel && sel.value !== (r ? r.key : '')) sel.value = r ? r.key : ''; // Menü folgt dem Eingabefeld
   $('#ev-list').innerHTML = ui.ev.dishes.map((d, k) => `<button type="button" class="who" data-act="ev-del" data-k="${k}" aria-pressed="true" aria-label="${esc(d)} entfernen">${esc(d)} ✕</button>`).join('');
-  const known = r ? r.dishes.filter(d => !have.has(d.key)) : [];
-  $('#ev-known').innerHTML = known.length ? `<span class="lbl">Schon bekannt – antippen</span><div class="whos">${known.map(d => `<button type="button" class="who" data-act="ev-known" data-name="${esc(d.name)}">+ ${esc(d.name)}</button>`).join('')}</div>` : '';
+  const known = r ? [...r.dishes.values()].filter(d => !have.has(norm(d))) : [];
+  $('#ev-known').innerHTML = known.length ? `<span class="lbl">Schon bekannt – antippen</span><div class="whos">${known.length > 1 ? `<button type="button" class="who" data-act="ev-all">+ Alle (${known.length})</button>` : ''}${known.map(d => `<button type="button" class="who" data-act="ev-known" data-name="${esc(d)}">+ ${esc(d)}</button>`).join('')}</div>` : '';
 }
 function evAdd(name) {
   const inp = $('#f-ed'), d = cap(name ?? inp.value, 100);
@@ -1626,14 +1667,15 @@ function guestMessage() {
 async function guestSend(how) {
   if (!gst.name.trim() || !gst.picks.some(p => p.v)) return;
   const msg = guestMessage();
-  let ok;
-  if (how === 'share') ok = await shareText(msg);
-  else {
-    ok = await copyText(msg);
-    if (ok) { const b = $('#g-copy'); if (b) b.textContent = '✓ Kopiert – jetzt in die Gruppe einfügen'; toast('✓ Kopiert – jetzt in die Gruppe einfügen'); }
-    else return showManual(msg);
+  let r = how === 'share' ? await shareText(msg) : 'fail';
+  if (r === 'abort') return;
+  if (r === 'fail') { // Kopieren – direkt gewählt oder weil Teilen hier nicht geht
+    if (!(await copyText(msg))) { renderSend(); return showManual(msg); }
+    const txt = how === 'share' ? 'Teilen geht hier nicht – Nachricht kopiert, jetzt in die Gruppe einfügen' : '✓ Kopiert – jetzt in die Gruppe einfügen';
+    if (how === 'share') renderSend(); // Teilen-Knopf verschwindet, Kopieren wird breit
+    const b = $('#g-copy'); if (b) b.textContent = '✓ Kopiert – jetzt in die Gruppe einfügen';
+    toast(txt);
   }
-  if (!ok) return;
   store.set(LS.guest, cap(gst.name, 30)); // einziger Key im Gast-Modus: Name fürs nächste Mal
   scooter('ltr', 'Ab in die Gruppe!');
   gst.sent = true;
@@ -1721,8 +1763,17 @@ document.addEventListener('click', ev => {
     case 'ev-add': evAdd(); break;
     case 'ev-del': ui.ev.dishes.splice(+el.dataset.k, 1); renderEvDishes(); break;
     case 'ev-known': evAdd(el.dataset.name); break;
+    case 'ev-all': { const r = knownRestaurants().find(x => x.key === norm($('#f-r').value)), have = new Set(ui.ev.dishes.map(norm));
+      const add = r ? [...r.dishes.values()].filter(d => !have.has(norm(d))) : [], room = 12 - ui.ev.dishes.length;
+      ui.ev.dishes.push(...add.slice(0, Math.max(0, room))); renderEvDishes();
+      if (add.length > room) toast('Mehr als 12 Gerichte passen nicht in einen Link'); break; }
     case 'ev-create': createEvening(); break;
-    case 'ev-share': shareText(ui.evLink).then(ok => { if (ok) toast('Geteilt'); }); break;
+    case 'ev-share': shareText(ui.evLink).then(async r => {
+      if (r === 'ok') return toast('Geteilt');
+      if (r !== 'fail') return;
+      el.remove(); $('#sheet .g-btns')?.classList.add('one'); // Teilen geht hier nicht → nur noch Kopieren
+      if (await copyText(ui.evLink)) toast('Teilen geht hier nicht – Link kopiert'); else showManual(ui.evLink);
+    }); break;
     case 'ev-copy': copyText(ui.evLink).then(ok => ok ? toast('✓ Link kopiert') : showManual(ui.evLink)); break;
     case 'paste-guests': pasteGuests(); break;
     case 'paste-go': { const ta = $('#f-paste'); if (!ta.value.trim()) return fieldErr('#f-paste', 'Erst Nachrichten einfügen'); importGuestText(ta.value); break; }
@@ -1778,12 +1829,16 @@ document.addEventListener('input', ev => {
   const t = ev.target;
   if (t.classList.contains('err')) t.classList.remove('err');
   if (t.id === 'q') { ui.q = t.value; renderList(false); }
-  else if (t.id === 'f-r') { onRestaurantInput(); if ($('#ev-known')) renderEvDishes(); }
+  else if (t.id === 'f-r') {
+    onRestaurantInput();
+    if ($('#ev-known')) { const k = knownRestaurants().find(x => x.key === norm(t.value)); if (k && ui.edit.st.cuisine !== k.cuisine) { ui.edit.st.cuisine = k.cuisine; syncCuisineBtns(true); } renderEvDishes(); }
+  }
   else if (t.id === 'g-name') { gst.name = t.value; renderSend(); }
   else if (t.id === 'g-free') gst.picks[+t.dataset.i].free = t.value;
   else if (t.id === 'f-color') setAccent(t.value); // Live-Vorschau beim Ziehen im Farbwähler
 });
 document.addEventListener('change', ev => {
+  if (ev.target.id === 'f-known' && ev.target.value) pickKnownRestaurant(ev.target.value);
   if (ev.target.id === 'f-anim') { animPref = ev.target.checked; store.set(LS.anim, animPref); applyAnim(); }
 });
 document.addEventListener('keydown', ev => {
